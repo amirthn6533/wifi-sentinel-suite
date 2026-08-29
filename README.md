@@ -1,8 +1,8 @@
-# ⚡ Wi-Fi Cyber Suite | Advanced RF Sensing, Security, Heatmap & Spy Bug Hunter
+# ⚡ Wi-Fi Cyber Suite | Advanced RF Sensing, Security, Heatmap & OSINT Recon
 
 > **Ever seen a spy movie where an agent sweeps a hotel room with a beeping gadget to find hidden bugs? That’s literally this app.**
 > 
-> A high-performance Wi-Fi surveillance, security audit, 360° radar, spectrum analyzer, **2D/3D RF Heatmap & Raytracer**, **Spy Cam & Drone Hunter**, and **camera-less human motion detector** optimized for Realtek RTL8811AU (TP-Link High-Gain USB Antenna) and all standard Wi-Fi cards.
+> A high-performance Wi-Fi surveillance, security audit, 360° radar, spectrum analyzer, **2D/3D RF Heatmap & Raytracer**, **Spy Cam & Drone Hunter**, **Mr. Robot OSINT Recon Hunter**, and **camera-less human motion detector** optimized for Realtek RTL8811AU (TP-Link High-Gain USB Antenna) and all standard Wi-Fi cards.
 
 ---
 
@@ -11,11 +11,12 @@ Double-click **`RUN_WIFI_SUITE.bat`** to open the Master Hub, or run individual 
 
 | Executable File | Application | Description |
 |---|---|---|
-| **`RUN_WIFI_SUITE.bat`** | ⚡ **Master Command Center (`hub.py`)** | Central 4-module cyber dashboard to launch any tool with 1 click |
+| **`RUN_WIFI_SUITE.bat`** | ⚡ **Master Command Center (`hub.py`)** | Central 5-tool cyber dashboard to launch any module with 1 click |
 | **`run_motion_sensor.bat`** | 🚨 **Wi-Fi Motion Sentinel (`wifi_motion_sensor.py`)** | RF wave seismograph, 5s noise calibration, burglar alarm |
 | **`run_radar.bat`** | 📡 **Wi-Fi Radar & Security (`wifi_radar.py`)** | 360° radar, spectrum analyzer, Evil Twin detection, vendor OUI |
 | **`run_heatmap.bat`** | 🗺️ **Wi-Fi 2D/3D Heatmap (`wifi_heatmap.py`)** | Interactive floorplan, RF Raytracer, AI AP locator, 3D surface |
 | **`run_spy_hunter.bat`** | 🕵️‍♂️ **Spy Cam & Drone Hunter (`wifi_spy_hunter.py`)** | Directional Geiger bug sweep, pinhole cam OUI fingerprinting, drone detector |
+| **`run_osint_recon.bat`** | 💀 **Elliot OSINT Hunter (`elliot_recon.py`)** | 100+ platforms asynchronous digital footprint & email recon |
 
 ---
 
@@ -48,6 +49,13 @@ Double-click **`RUN_WIFI_SUITE.bat`** to open the Master Hub, or run individual 
 - **Directional Geiger Homing Compass:** Target-locks suspicious devices and plays real-time audio Geiger clicks that speed up as you point your antenna toward the physical bug.
 - **1D Kalman Filter Anti-Jitter:** Mathematical smoothing for rock-solid signal tracking.
 - **Proximity Range Alert:** Classifies distance into `< 1m (Search Objects!)`, `1-3m (In This Room)`, and `> 5m (Distant)`.
+
+### 5. 💀 Elliot OSINT & Digital Footprint Hunter (`elliot_recon.py`)
+Remember how Elliot in *Mr. Robot* would sit in front of his black terminal, type a single username, and pull up someone's entire digital footprint across the internet in seconds? I wanted that exact capability in real life, so I built it.
+
+Most people use the same handle across dev hubs, gaming networks, socials, and forums without realizing how much data they leave scattered across the web. Instead of manually searching through dozens of websites, my tool automates the entire investigation in under three seconds.
+
+Under the hood, the engine deploys thirty-five parallel worker threads that simultaneously probe over a hundred high-value platforms, ranging from GitHub, Reddit, and Telegram to Steam, Spotify, and HackTheBox. Rather than relying solely on simple status codes, it inspects server response headers and HTML body signatures to filter out fake redirects and only report verified, active profiles. It also handles email reconnaissance by calculating real-time MD5 hashes to query global identity databases, pulling registered avatars, display names, and public bios. The moment the scan finishes, everything is compiled into a clean investigation dossier ready for review.
 
 ---
 
