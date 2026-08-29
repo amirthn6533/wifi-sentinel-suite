@@ -1,10 +1,10 @@
 """
 =============================================================================
-🌐 3D CYBER ATTACK THREAT GLOBE (Kaspersky & Norse War Room Ultra HD)
+🌐 CYBER THREAT COMMAND CENTER | 3D Globe & 2D World War Map (Ultra HD)
 =============================================================================
 Author: Antigravity Pair Programmer
-Architecture: High-Density Luminous 3D Landmass Mesh & Multi-Vector Laser Arcs
-Inspired by: Kaspersky Cybermap & Norse Attack Threat Matrix
+Architecture: Real 180-Country Vector Topography + Dual 3D/2D War Room Matrix
+Features: 3D Spherical & 2D Flat Mercator Views + Real-Time Ballistic Missiles
 =============================================================================
 """
 
@@ -12,13 +12,15 @@ import sys
 import os
 import time
 import math
+import json
 import random
 import threading
 from collections import deque
 import tkinter as tk
 from tkinter import ttk, messagebox
+import numpy as np
 
-# Audio Engine for Radar & Laser Impact SFX
+# Audio Engine for Radar & Missile SFX
 try:
     import winsound
     HAS_SOUND = True
@@ -27,12 +29,23 @@ except ImportError:
 
 
 # =====================================================================
-# High-Value Global Cyber Targets (Real Lat/Lon & National Tags)
+# Load Real 180-Country Vector Topography Database
 # =====================================================================
+DATA_PATH = os.path.join(os.path.dirname(__file__), "world_map_data.json")
+WORLD_COUNTRIES = []
+
+if os.path.exists(DATA_PATH):
+    try:
+        with open(DATA_PATH, 'r', encoding='utf-8') as f:
+            WORLD_COUNTRIES = json.load(f)
+    except Exception as e:
+        print("Error loading world_map_data.json:", e)
+
+# 35 Major Strategic Hubs (Capitals & Cloud DCs)
 CITIES_DB = {
     "USA (Washington D.C.)": {"lat": 38.90, "lon": -77.03, "flag": "🇺🇸"},
-    "USA (New York Cloud)": {"lat": 40.71, "lon": -74.00, "flag": "🇺🇸"},
     "USA (Silicon Valley)": {"lat": 37.38, "lon": -122.08, "flag": "🇺🇸"},
+    "USA (New York Cloud)": {"lat": 40.71, "lon": -74.00, "flag": "🇺🇸"},
     "Iran (Tehran)": {"lat": 35.68, "lon": 51.38, "flag": "🇮🇷"},
     "Iran (Isfahan Grid)": {"lat": 32.65, "lon": 51.66, "flag": "🇮🇷"},
     "Russia (Moscow)": {"lat": 55.75, "lon": 37.61, "flag": "🇷🇺"},
@@ -60,83 +73,40 @@ CITIES_DB = {
     "Ukraine (Kyiv)": {"lat": 50.45, "lon": 30.52, "flag": "🇺🇦"},
 }
 
-# Detailed Continents Vector Boundaries
-DETAILED_LANDMASS = [
-    # North America
-    [(70, -165), (71, -125), (60, -90), (55, -60), (45, -53), (30, -81), (25, -80), (18, -90), (14, -92), (8, -78),
-     (16, -95), (25, -110), (33, -118), (48, -125), (58, -137), (65, -168), (70, -165)],
-    # South America
-    [(12, -75), (8, -58), (-2, -50), (-7, -35), (-23, -42), (-35, -57), (-55, -67), (-52, -75), (-33, -72), (-18, -70), (-4, -80), (7, -77), (12, -75)],
-    # Europe
-    [(71, 28), (68, 45), (60, 30), (54, 19), (45, 14), (37, -6), (36, -9), (43, -9), (48, -5), (58, 6), (64, 12), (71, 28)],
-    # Great Britain & Ireland
-    [(58, -5), (55, -1), (50, 0), (50, -5), (55, -6), (58, -5)],
-    # Africa
-    [(37, 10), (32, 33), (12, 44), (-10, 40), (-28, 32), (-34, 19), (-22, 14), (4, 9), (5, 0), (15, -17), (28, -13), (35, -6), (37, 10)],
-    # Asia & Middle East
-    [(42, 28), (38, 48), (27, 51), (24, 60), (22, 70), (8, 77), (14, 85), (22, 90), (15, 100), (1, 104), (10, 108), (22, 114),
-     (32, 122), (39, 124), (42, 131), (52, 142), (60, 160), (70, 175), (75, 135), (73, 90), (68, 60), (50, 55), (42, 28)],
-    # Japan Islands
-    [(44, 145), (38, 141), (34, 136), (31, 131), (35, 134), (40, 140), (44, 145)],
-    # Australia & NZ
-    [(-12, 132), (-15, 145), (-25, 153), (-38, 148), (-38, 140), (-35, 115), (-22, 114), (-12, 132)]
-]
-
-# Generate dense luminous dot matrix for continents (Creates breathtaking glowing landmass)
-LAND_DOTS = []
-for lat_s in range(-55, 75, 4):
-    for lon_s in range(-180, 180, 5):
-        # Point-in-polygon heuristic for major continental landmasses
-        is_land = False
-        if (-50 <= lat_s <= 12 and -80 <= lon_s <= -35):  # South America
-            is_land = True
-        elif (15 <= lat_s <= 70 and -140 <= lon_s <= -55):  # North America
-            is_land = True
-        elif (35 <= lat_s <= 70 and -10 <= lon_s <= 40):  # Europe
-            is_land = True
-        elif (-35 <= lat_s <= 37 and -18 <= lon_s <= 52):  # Africa
-            is_land = True
-        elif (5 <= lat_s <= 72 and 40 <= lon_s <= 150):  # Asia & Middle East
-            is_land = True
-        elif (-40 <= lat_s <= -10 and 110 <= lon_s <= 155):  # Australia
-            is_land = True
-
-        if is_land:
-            # Add spherical point
-            phi = math.radians(lat_s)
-            theta = math.radians(lon_s)
-            LAND_DOTS.append((math.cos(phi) * math.sin(theta), -math.sin(phi), math.cos(phi) * math.cos(theta)))
-
-ATTACK_PAYLOADS = [
-    {"name": "DDoS Volumetric Surge (980 Gbps)", "tag": "DDoS-FLOOD", "color": "#ff0055", "sev": "CRITICAL"},
-    {"name": "LockBit 3.0 Enterprise Ransomware", "tag": "RANSOMWARE", "color": "#a855f7", "sev": "HIGH"},
-    {"name": "Pegasus Zero-Day Mobile Infiltration", "tag": "ZERO-DAY", "color": "#ffb703", "sev": "CRITICAL"},
-    {"name": "C2 Botnet CobaltStrike Beacon", "tag": "C2-BEACON", "color": "#00ff9d", "sev": "HIGH"},
-    {"name": "SQLi Financial Ledger Data Exfiltration", "tag": "DATA-BREACH", "color": "#00f0ff", "sev": "MEDIUM"},
-    {"name": "SCADA Industrial Grid Sabotage", "tag": "ICS-ATTACK", "color": "#f97316", "sev": "EXTREME"},
+ATTACK_TYPES = [
+    {"name": "DDoS Volumetric Surge (1.2 Tbps)", "tag": "DDoS-FLOOD", "color": "#ff0055"},
+    {"name": "LockBit 3.0 Enterprise Ransomware", "tag": "RANSOMWARE", "color": "#a855f7"},
+    {"name": "Pegasus Zero-Day Mobile Infiltration", "tag": "ZERO-DAY", "color": "#ffb703"},
+    {"name": "CobaltStrike C2 Beacon Activity", "tag": "C2-BEACON", "color": "#00ff9d"},
+    {"name": "SQLi Financial Database Exfiltration", "tag": "DATA-BREACH", "color": "#00f0ff"},
+    {"name": "SCADA Industrial Grid Sabotage", "tag": "ICS-ATTACK", "color": "#f97316"},
 ]
 
 
 # =====================================================================
-# 3D Ballistic Laser Arc & Shockwave Particle Engine
+# 3D/2D Ballistic Missile & Shockwave Engine
 # =====================================================================
-class LaserMissile:
-    def __init__(self, src_key, dst_key, payload_meta, speed=0.016):
+class CyberMissile:
+    def __init__(self, src_key, dst_key, meta, speed=0.018):
         self.src = src_key
         self.dst = dst_key
-        self.meta = payload_meta
+        self.meta = meta
         self.progress = 0.0
         self.speed = speed
         self.alive = True
-        self.trail = deque(maxlen=14)
+        self.trail_3d = deque(maxlen=16)
+        self.trail_2d = deque(maxlen=16)
 
-        # 3D Coordinates
-        p_s = self.to_cartesian(CITIES_DB[src_key]["lat"], CITIES_DB[src_key]["lon"])
-        p_d = self.to_cartesian(CITIES_DB[dst_key]["lat"], CITIES_DB[dst_key]["lon"])
+        # Coordinates
+        self.lat1, self.lon1 = CITIES_DB[src_key]["lat"], CITIES_DB[src_key]["lon"]
+        self.lat2, self.lon2 = CITIES_DB[dst_key]["lat"], CITIES_DB[dst_key]["lon"]
+
+        # 3D endpoints on unit sphere
+        p_s = self.to_cartesian(self.lat1, self.lon1)
+        p_d = self.to_cartesian(self.lat2, self.lon2)
         self.p_start = p_s
         self.p_end = p_d
 
-        # High orbital altitude arch
         mid = (p_s + p_d) * 0.5
         norm = np.linalg.norm(mid)
         self.p_mid = (mid / norm) * random.uniform(1.45, 1.70) if norm > 1e-4 else np.array([0, 1.55, 0])
@@ -152,46 +122,54 @@ class LaserMissile:
             self.progress = 1.0
             self.alive = False
 
-        # Quadratic 3D Bézier Curve
         t = self.progress
-        curr = (1 - t)**2 * self.p_start + 2 * (1 - t) * t * self.p_mid + t**2 * self.p_end
-        self.trail.append(curr)
+        # 3D position
+        curr_3d = (1 - t)**2 * self.p_start + 2 * (1 - t) * t * self.p_mid + t**2 * self.p_end
+        self.trail_3d.append(curr_3d)
+
+        # 2D flat map position (Interpolated Lat/Lon with parabolic altitude arch)
+        curr_lat = (1 - t) * self.lat1 + t * self.lat2
+        curr_lon = (1 - t) * self.lon1 + t * self.lon2
+        arch_offset = math.sin(t * math.pi) * 35.0  # Arch upward in 2D
+        self.trail_2d.append((curr_lat + arch_offset, curr_lon))
 
 
-class CyberShockwave:
+class ExplosionShockwave:
     def __init__(self, dst_key, color):
         self.city = dst_key
         self.color = color
         self.radius = 3.0
-        self.max_radius = 34.0
+        self.max_radius = 36.0
         self.alpha = 1.0
         self.alive = True
 
         lat = CITIES_DB[dst_key]["lat"]
         lon = CITIES_DB[dst_key]["lon"]
+        self.lat = lat
+        self.lon = lon
         phi = math.radians(lat)
         theta = math.radians(lon)
         self.p3d = np.array([math.cos(phi) * math.sin(theta), -math.sin(phi), math.cos(phi) * math.cos(theta)])
 
     def update(self):
-        self.radius += 2.0
+        self.radius += 2.2
         self.alpha -= 0.05
         if self.alpha <= 0 or self.radius >= self.max_radius:
             self.alive = False
 
 
 # =====================================================================
-# Main GUI & 3D Interactive Canvas
+# Main Cyber Threat Command Center
 # =====================================================================
-class CyberGlobeUltra(tk.Tk):
+class CyberWarfareCommandCenter(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("🌐 3D CYBER ATTACK THREAT GLOBE | Global Warfare Command Center")
-        self.geometry("1420x880")
+        self.title("🌐 CYBER THREAT COMMAND CENTER | 3D Globe & 2D World War Map")
+        self.geometry("1440x900")
         self.minsize(1150, 750)
         self.configure(bg="#02040a")
 
-        # Neon Palette
+        # Palette
         self.c_bg = "#02040a"
         self.c_panel = "#070c18"
         self.c_card = "#0c1527"
@@ -200,18 +178,20 @@ class CyberGlobeUltra(tk.Tk):
         self.c_neon_green = "#00ff9d"
         self.c_neon_amber = "#ffb703"
         self.c_neon_red = "#ff0055"
-        self.c_neon_purple = "#a855f7"
         self.c_text = "#f8fafc"
         self.c_muted = "#64748b"
 
+        # Modes: '3D' or '2D'
+        self.view_mode = '3D'
+
         # 3D Globe Matrix State
-        self.radius_3d = 230
+        self.radius_3d = 235
         self.yaw = 0.55
         self.pitch = 0.20
         self.auto_spin = True
         self.spin_speed = 0.007
 
-        # Drag Interaction
+        # Drag State
         self.mouse_dragging = False
         self.last_mx = 0
         self.last_my = 0
@@ -219,12 +199,12 @@ class CyberGlobeUltra(tk.Tk):
         # Warfare Simulation
         self.missiles = []
         self.shockwaves = []
-        self.total_intercepts = 28490
+        self.total_intercepts = 34910
         self.defcon_level = 3  # Active default!
         self.sound_enabled = tk.BooleanVar(value=True)
 
         # Starfield
-        self.stars = [(random.randint(0, 1420), random.randint(0, 880), random.choice([1, 1, 2])) for _ in range(85)]
+        self.stars = [(random.randint(0, 1440), random.randint(0, 900), random.choice([1, 1, 2])) for _ in range(90)]
 
         self.setup_ui()
         self.populate_initial_logs()
@@ -242,29 +222,36 @@ class CyberGlobeUltra(tk.Tk):
         title_box = tk.Frame(header, bg=self.c_panel)
         title_box.pack(side=tk.LEFT, padx=20, pady=12)
 
-        tk.Label(title_box, text="🌐 3D CYBER THREAT GLOBE", font=('Segoe UI', 14, 'bold'),
+        tk.Label(title_box, text="🌐 CYBER THREAT COMMAND CENTER", font=('Segoe UI', 14, 'bold'),
                  bg=self.c_panel, fg=self.c_neon_cyan).pack(side=tk.LEFT, padx=(0, 10))
-        tk.Label(title_box, text="Live Global Cyber Warfare & Ballistic Telemetry Map", font=('Segoe UI', 9),
+        tk.Label(title_box, text="180-Country Vector Topography • Real-Time Ballistic Attack Matrix", font=('Segoe UI', 9),
                  bg=self.c_panel, fg=self.c_muted).pack(side=tk.LEFT)
 
-        # DEFCON Buttons
-        defcon_box = tk.Frame(header, bg=self.c_panel)
-        defcon_box.pack(side=tk.RIGHT, padx=20, pady=14)
+        # View Mode Toggle & DEFCON Controls
+        ctrl_box = tk.Frame(header, bg=self.c_panel)
+        ctrl_box.pack(side=tk.RIGHT, padx=20, pady=14)
 
-        tk.Label(defcon_box, text="WARFARE STATUS:", font=('Segoe UI', 9, 'bold'), bg=self.c_panel, fg=self.c_muted).pack(side=tk.LEFT, padx=(0, 8))
+        # 3D vs 2D Mode Switcher
+        self.btn_view_mode = tk.Button(ctrl_box, text="🗺️ SWITCH TO 2D FLAT MAP", bg="#1e3a8a", fg=self.c_neon_cyan,
+                                       font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=10, pady=3, cursor='hand2',
+                                       activebackground="#2563eb", activeforeground="#ffffff",
+                                       command=self.toggle_view_mode)
+        self.btn_view_mode.pack(side=tk.LEFT, padx=(0, 15))
 
-        self.btn_d5 = tk.Button(defcon_box, text="DEFCON 5 (PEACE)", bg=self.c_card, fg=self.c_neon_green,
-                                font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=8, pady=3, cursor='hand2',
+        tk.Label(ctrl_box, text="DEFCON:", font=('Segoe UI', 9, 'bold'), bg=self.c_panel, fg=self.c_muted).pack(side=tk.LEFT, padx=(0, 6))
+
+        self.btn_d5 = tk.Button(ctrl_box, text="DEFCON 5", bg=self.c_card, fg=self.c_neon_green,
+                                font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=7, pady=3, cursor='hand2',
                                 command=lambda: self.set_defcon(5))
         self.btn_d5.pack(side=tk.LEFT, padx=2)
 
-        self.btn_d3 = tk.Button(defcon_box, text="DEFCON 3 (ACTIVE)", bg=self.c_neon_amber, fg="#030611",
-                                font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=8, pady=3, cursor='hand2',
+        self.btn_d3 = tk.Button(ctrl_box, text="DEFCON 3", bg=self.c_neon_amber, fg="#030611",
+                                font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=7, pady=3, cursor='hand2',
                                 command=lambda: self.set_defcon(3))
         self.btn_d3.pack(side=tk.LEFT, padx=2)
 
-        self.btn_d1 = tk.Button(defcon_box, text="DEFCON 1 (GLOBAL WAR)", bg=self.c_card, fg=self.c_neon_red,
-                                font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=8, pady=3, cursor='hand2',
+        self.btn_d1 = tk.Button(ctrl_box, text="DEFCON 1 (WAR)", bg=self.c_card, fg=self.c_neon_red,
+                                font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=7, pady=3, cursor='hand2',
                                 command=lambda: self.set_defcon(1))
         self.btn_d1.pack(side=tk.LEFT, padx=2)
 
@@ -274,11 +261,11 @@ class CyberGlobeUltra(tk.Tk):
         main_box = tk.Frame(self, bg=self.c_bg)
         main_box.pack(fill=tk.BOTH, expand=True, padx=12, pady=12)
 
-        # Center Column: 3D Canvas
-        globe_frame = tk.Frame(main_box, bg="#010308", highlightthickness=1, highlightbackground=self.c_border)
-        globe_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        # Center Column: 3D/2D Canvas
+        canvas_frame = tk.Frame(main_box, bg="#010308", highlightthickness=1, highlightbackground=self.c_border)
+        canvas_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
 
-        self.canvas = tk.Canvas(globe_frame, bg="#010308", highlightthickness=0)
+        self.canvas = tk.Canvas(canvas_frame, bg="#010308", highlightthickness=0)
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         # Bindings
@@ -300,7 +287,7 @@ class CyberGlobeUltra(tk.Tk):
         strike_card = tk.Frame(parent, bg=self.c_card, highlightthickness=1, highlightbackground=self.c_border, padx=12, pady=10)
         strike_card.pack(fill=tk.X, padx=pad, pady=(12, 6))
 
-        tk.Label(strike_card, text="🚀 MANUAL CYBER MISSILE LAUNCHER", font=('Segoe UI', 9, 'bold'), bg=self.c_card, fg=self.c_neon_red).pack(anchor='w')
+        tk.Label(strike_card, text="🚀 MANUAL CYBER MISSILE STRIKE", font=('Segoe UI', 9, 'bold'), bg=self.c_card, fg=self.c_neon_red).pack(anchor='w')
 
         f_src = tk.Frame(strike_card, bg=self.c_card)
         f_src.pack(fill=tk.X, pady=(6, 2))
@@ -319,11 +306,11 @@ class CyberGlobeUltra(tk.Tk):
         f_atk = tk.Frame(strike_card, bg=self.c_card)
         f_atk.pack(fill=tk.X, pady=2)
         tk.Label(f_atk, text="Payload:", font=('Segoe UI', 8), bg=self.c_card, fg=self.c_muted, width=7, anchor='w').pack(side=tk.LEFT)
-        self.combo_atk = ttk.Combobox(f_atk, values=[a["name"] for a in ATTACK_PAYLOADS], state="readonly", font=('Segoe UI', 8))
+        self.combo_atk = ttk.Combobox(f_atk, values=[a["name"] for a in ATTACK_TYPES], state="readonly", font=('Segoe UI', 8))
         self.combo_atk.current(0)
         self.combo_atk.pack(side=tk.RIGHT, fill=tk.X, expand=True)
 
-        btn_fire = tk.Button(strike_card, text="⚡ FIRE CYBER MISSILE 🚀", bg=self.c_neon_red, fg="#ffffff",
+        btn_fire = tk.Button(strike_card, text="⚡ LAUNCH CYBER MISSILE 🚀", bg=self.c_neon_red, fg="#ffffff",
                              font=('Segoe UI', 9, 'bold'), relief=tk.FLAT, pady=6, cursor='hand2',
                              activebackground="#b91c1c", activeforeground="#ffffff",
                              command=self.fire_manual_missile)
@@ -335,10 +322,10 @@ class CyberGlobeUltra(tk.Tk):
 
         tk.Label(stats_card, text="GLOBAL ATTACK VELOCITY", font=('Segoe UI', 8, 'bold'), bg=self.c_card, fg=self.c_muted).pack(anchor='w')
 
-        self.lbl_attack_count = tk.Label(stats_card, text="28,490", font=('Consolas', 22, 'bold'), bg=self.c_card, fg=self.c_neon_cyan)
+        self.lbl_attack_count = tk.Label(stats_card, text="34,910", font=('Consolas', 22, 'bold'), bg=self.c_card, fg=self.c_neon_cyan)
         self.lbl_attack_count.pack(anchor='w', pady=(2, 0))
 
-        tk.Label(stats_card, text="🔴 Attacks Intercepted Worldwide | Peak: 2.14 Tbps", font=('Segoe UI', 8, 'bold'),
+        tk.Label(stats_card, text="🔴 Attacks Intercepted Worldwide | Peak: 2.38 Tbps", font=('Segoe UI', 8, 'bold'),
                  bg=self.c_card, fg=self.c_neon_green).pack(anchor='w')
 
         # Card 3: Live War Room Telemetry Feed
@@ -359,17 +346,25 @@ class CyberGlobeUltra(tk.Tk):
                        bg=self.c_panel, fg=self.c_text, selectcolor=self.c_card,
                        font=('Segoe UI', 9, 'bold'), activebackground=self.c_panel).pack(side=tk.LEFT)
 
-        btn_spin = tk.Button(ctrl_bar, text="🔄 Toggle Auto-Spin", bg=self.c_border, fg=self.c_neon_cyan,
+        btn_spin = tk.Button(ctrl_bar, text="🔄 Toggle Spin", bg=self.c_border, fg=self.c_neon_cyan,
                              font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=8, pady=3, cursor='hand2',
                              command=self.toggle_spin)
         btn_spin.pack(side=tk.RIGHT)
+
+    def toggle_view_mode(self):
+        if self.view_mode == '3D':
+            self.view_mode = '2D'
+            self.btn_view_mode.config(text="🌐 SWITCH TO 3D GLOBE")
+        else:
+            self.view_mode = '3D'
+            self.btn_view_mode.config(text="🗺️ SWITCH TO 2D FLAT MAP")
 
     def populate_initial_logs(self):
         sample_cities = list(CITIES_DB.keys())
         for _ in range(12):
             s = random.choice(sample_cities)
             d = random.choice([c for c in sample_cities if c != s])
-            m = random.choice(ATTACK_PAYLOADS)
+            m = random.choice(ATTACK_TYPES)
             t_str = time.strftime('%H:%M:%S')
             log_entry = f"[{t_str}] ➔ [{m['tag']}] {s.split('(')[0]} ➔ {d.split('(')[0]}"
             self.feed_list.insert(tk.END, log_entry)
@@ -392,8 +387,8 @@ class CyberGlobeUltra(tk.Tk):
             messagebox.showwarning("Target Conflict", "Source and Target cannot be the same location.")
             return
 
-        meta = next((a for a in ATTACK_PAYLOADS if a["name"] == atk_name), ATTACK_PAYLOADS[0])
-        missile = LaserMissile(src, dst, meta, speed=0.022)
+        meta = next((a for a in ATTACK_TYPES if a["name"] == atk_name), ATTACK_TYPES[0])
+        missile = CyberMissile(src, dst, meta, speed=0.022)
         self.missiles.append(missile)
         self.log_attack_event(src, dst, meta)
 
@@ -424,7 +419,7 @@ class CyberGlobeUltra(tk.Tk):
         self.last_my = event.y
 
     def on_mouse_drag(self, event):
-        if self.mouse_dragging:
+        if self.mouse_dragging and self.view_mode == '3D':
             dx = event.x - self.last_mx
             dy = event.y - self.last_my
             self.yaw += dx * 0.008
@@ -437,24 +432,25 @@ class CyberGlobeUltra(tk.Tk):
         self.mouse_dragging = False
 
     def on_mouse_wheel(self, event):
-        if event.delta > 0:
-            self.radius_3d = min(350, self.radius_3d + 18)
-        else:
-            self.radius_3d = max(140, self.radius_3d - 18)
+        if self.view_mode == '3D':
+            if event.delta > 0:
+                self.radius_3d = min(360, self.radius_3d + 18)
+            else:
+                self.radius_3d = max(140, self.radius_3d - 18)
 
     # -------------------------------------------------------------
-    # 3D Mathematical Projection
+    # 3D Matrix Transformation & 2D Projection
     # -------------------------------------------------------------
     def project_3d_point(self, p, cx, cy):
         x, y, z = p
 
-        # 1. Pitch (X)
+        # 1. Pitch
         cos_p = math.cos(self.pitch)
         sin_p = math.sin(self.pitch)
         y1 = y * cos_p - z * sin_p
         z1 = y * sin_p + z * cos_p
 
-        # 2. Yaw (Y)
+        # 2. Yaw
         cos_y = math.cos(self.yaw)
         sin_y = math.sin(self.yaw)
         x2 = x * cos_y + z1 * sin_y
@@ -469,13 +465,24 @@ class CyberGlobeUltra(tk.Tk):
         is_visible = (z2 > -0.15)
         return sx, sy, z2, is_visible
 
+    def project_2d_flat_point(self, lat, lon, w, h):
+        """Equirectangular World Projection: map lat/lon linearly to 2D canvas."""
+        pad_x = 40
+        pad_y = 40
+        cw = w - 2 * pad_x
+        ch = h - 2 * pad_y
+
+        sx = pad_x + ((lon + 180.0) / 360.0) * cw
+        sy = pad_y + ((90.0 - lat) / 180.0) * ch
+        return sx, sy
+
     # -------------------------------------------------------------
     # 60 FPS Render Engine
     # -------------------------------------------------------------
     def start_render_loop(self):
         def loop():
             self.render_frame()
-            if self.auto_spin and not self.mouse_dragging:
+            if self.auto_spin and not self.mouse_dragging and self.view_mode == '3D':
                 self.yaw += self.spin_speed
             self.after(20, loop)
 
@@ -492,58 +499,53 @@ class CyberGlobeUltra(tk.Tk):
         for (sx, sy, size) in self.stars:
             self.canvas.create_oval(sx, sy, sx + size, sy + size, fill="#334155", outline="")
 
-        # 2. Glowing Atmosphere Halo
-        r_glow = self.radius_3d + 16
-        self.canvas.create_oval(cx - r_glow, cy - r_glow, cx + r_glow, cy + r_glow,
-                                outline="#0369a1", width=2)
-        self.canvas.create_oval(cx - self.radius_3d, cy - self.radius_3d, cx + self.radius_3d, cy + self.radius_3d,
-                                outline="#00f0ff", width=2.5)
+        if self.view_mode == '3D':
+            # 3D GLOBE MODE
+            # Glowing Atmosphere Halo
+            r_glow = self.radius_3d + 16
+            self.canvas.create_oval(cx - r_glow, cy - r_glow, cx + r_glow, cy + r_glow, outline="#0369a1", width=2)
+            self.canvas.create_oval(cx - self.radius_3d, cy - self.radius_3d, cx + self.radius_3d, cy + self.radius_3d,
+                                    outline="#00f0ff", width=2.5)
 
-        # 3. Dense Glowing Landmass Matrix (Produces breathtaking futuristic land effect!)
-        self.draw_luminous_land_dots(cx, cy)
+            # Draw 180 Real Countries on 3D Globe
+            self.draw_3d_real_countries(cx, cy)
+            # Draw 3D Cities
+            self.draw_3d_cities(cx, cy)
+            # Draw 3D Missiles & Shockwaves
+            self.draw_3d_missiles(cx, cy)
+            self.draw_3d_shockwaves(cx, cy)
+        else:
+            # 2D FLAT WAR MAP MODE
+            self.draw_2d_flat_map(w, h)
+            self.draw_2d_missiles(w, h)
+            self.draw_2d_shockwaves(w, h)
 
-        # 4. Continents Vector Boundaries
-        self.draw_continents_vector(cx, cy)
+        # Cyber HUD Overlays
+        self.draw_hud_overlays(w, h)
 
-        # 5. Glowing City Nodes & Target Rings
-        self.draw_city_nodes(cx, cy)
+    # -------------------------------------------------------------
+    # 3D Render Routines
+    # -------------------------------------------------------------
+    def draw_3d_real_countries(self, cx, cy):
+        """Draws exact 180 real country polygons on 3D globe."""
+        for country in WORLD_COUNTRIES:
+            for poly in country.get("polys", []):
+                pts = []
+                for (lat, lon) in poly:
+                    phi = math.radians(lat)
+                    theta = math.radians(lon)
+                    p = (math.cos(phi) * math.sin(theta), -math.sin(phi), math.cos(phi) * math.cos(theta))
+                    sx, sy, z, vis = self.project_3d_point(p, cx, cy)
+                    if vis and z > -0.05:
+                        pts.extend([sx, sy])
+                    else:
+                        if len(pts) >= 4:
+                            self.canvas.create_line(pts, fill="#00f0ff", width=1.4, smooth=True)
+                        pts = []
+                if len(pts) >= 4:
+                    self.canvas.create_line(pts, fill="#00f0ff", width=1.4, smooth=True)
 
-        # 6. 3D Laser Ballistic Missiles with Bright Comet Trails
-        self.draw_laser_missiles(cx, cy)
-
-        # 7. Expanding Impact Shockwaves
-        self.draw_shockwaves(cx, cy)
-
-        # 8. Cyber HUD Overlays
-        self.draw_hud_overlays(cx, cy, w, h)
-
-    def draw_luminous_land_dots(self, cx, cy):
-        """Draws glowing 3D landmass particles giving the globe a full solid neon appearance."""
-        for p in LAND_DOTS:
-            sx, sy, z, vis = self.project_3d_point(p, cx, cy)
-            if vis and z > 0.0:
-                # Front hemisphere glowing cyan/green dot
-                alpha_col = "#00f0ff" if z > 0.4 else "#0284c7"
-                self.canvas.create_rectangle(sx - 1.2, sy - 1.2, sx + 1.2, sy + 1.2, fill=alpha_col, outline="")
-
-    def draw_continents_vector(self, cx, cy):
-        for poly in DETAILED_LANDMASS:
-            pts = []
-            for (lat, lon) in poly:
-                phi = math.radians(lat)
-                theta = math.radians(lon)
-                p = (math.cos(phi) * math.sin(theta), -math.sin(phi), math.cos(phi) * math.cos(theta))
-                sx, sy, z, vis = self.project_3d_point(p, cx, cy)
-                if vis and z > -0.05:
-                    pts.extend([sx, sy])
-                else:
-                    if len(pts) >= 4:
-                        self.canvas.create_line(pts, fill="#38bdf8", width=1.5, smooth=True)
-                    pts = []
-            if len(pts) >= 4:
-                self.canvas.create_line(pts, fill="#38bdf8", width=1.5, smooth=True)
-
-    def draw_city_nodes(self, cx, cy):
+    def draw_3d_cities(self, cx, cy):
         for name, data in CITIES_DB.items():
             phi = math.radians(data["lat"])
             theta = math.radians(data["lon"])
@@ -551,41 +553,33 @@ class CyberGlobeUltra(tk.Tk):
             sx, sy, z, vis = self.project_3d_point(p, cx, cy)
 
             if vis and z > 0.10:
-                # Glowing Node Core
                 self.canvas.create_oval(sx - 4, sy - 4, sx + 4, sy + 4, fill="#ffffff", outline=self.c_neon_green, width=2)
-                
-                # City label
                 if z > 0.30:
                     c_short = name.split("(")[0].strip()
                     self.canvas.create_text(sx + 7, sy - 4, text=f"{data['flag']} {c_short}",
                                             font=('Segoe UI', 8, 'bold'), fill="#f1f5f9", anchor='w')
 
-    def draw_laser_missiles(self, cx, cy):
+    def draw_3d_missiles(self, cx, cy):
         active = []
         for m in self.missiles:
             m.update()
-            if len(m.trail) >= 2:
+            if len(m.trail_3d) >= 2:
                 pts = []
-                for p3d in m.trail:
+                for p3d in m.trail_3d:
                     sx, sy, z, vis = self.project_3d_point(p3d, cx, cy)
                     if vis:
                         pts.extend([sx, sy])
 
                 if len(pts) >= 4:
-                    # Glowing outer aura line
                     self.canvas.create_line(pts, fill=m.meta["color"], width=4, smooth=True)
-                    # Bright inner core laser beam
                     self.canvas.create_line(pts, fill="#ffffff", width=1.8, smooth=True)
-
-                    # Missile head comet
                     hx, hy = pts[-2], pts[-1]
                     self.canvas.create_oval(hx - 5, hy - 5, hx + 5, hy + 5, fill="#ffffff", outline=m.meta["color"], width=2)
 
             if m.alive:
                 active.append(m)
             else:
-                # Strike Impact!
-                self.shockwaves.append(CyberShockwave(m.dst, m.meta["color"]))
+                self.shockwaves.append(ExplosionShockwave(m.dst, m.meta["color"]))
                 if self.sound_enabled.get() and HAS_SOUND and random.random() < 0.30:
                     try:
                         winsound.Beep(320, 35)
@@ -594,22 +588,88 @@ class CyberGlobeUltra(tk.Tk):
 
         self.missiles = active
 
-    def draw_shockwaves(self, cx, cy):
+    def draw_3d_shockwaves(self, cx, cy):
         active = []
         for s in self.shockwaves:
             s.update()
             sx, sy, z, vis = self.project_3d_point(s.p3d, cx, cy)
             if vis and z > 0.0:
                 r = s.radius
-                # Expanding double impact ring
                 self.canvas.create_oval(sx - r, sy - r, sx + r, sy + r, outline=s.color, width=2.5)
                 self.canvas.create_oval(sx - (r*0.6), sy - (r*0.6), sx + (r*0.6), sy + (r*0.6), outline="#ffffff", width=1.5)
             if s.alive:
                 active.append(s)
         self.shockwaves = active
 
-    def draw_hud_overlays(self, cx, cy, w, h):
-        # Targeting Grid & Brackets
+    # -------------------------------------------------------------
+    # 2D Flat World Map Render Routines
+    # -------------------------------------------------------------
+    def draw_2d_flat_map(self, w, h):
+        """Draws crystal-clear 180 real country polygons on flat Mercator/Equirectangular grid."""
+        # 2D Cyber Grid
+        for x_g in range(40, w - 40, 60):
+            self.canvas.create_line(x_g, 40, x_g, h - 40, fill="#0b172a", width=1)
+        for y_g in range(40, h - 40, 50):
+            self.canvas.create_line(40, y_g, w - 40, y_g, fill="#0b172a", width=1)
+
+        # Real 180 Countries Outlines
+        for country in WORLD_COUNTRIES:
+            for poly in country.get("polys", []):
+                pts = []
+                for (lat, lon) in poly:
+                    sx, sy = self.project_2d_flat_point(lat, lon, w, h)
+                    pts.extend([sx, sy])
+                if len(pts) >= 4:
+                    self.canvas.create_polygon(pts, fill="#071a33", outline="#00e5ff", width=1.2, smooth=True)
+
+        # 2D City Nodes
+        for name, data in CITIES_DB.items():
+            sx, sy = self.project_2d_flat_point(data["lat"], data["lon"], w, h)
+            self.canvas.create_oval(sx - 4, sy - 4, sx + 4, sy + 4, fill="#ffffff", outline=self.c_neon_green, width=2)
+            c_short = name.split("(")[0].strip()
+            self.canvas.create_text(sx + 6, sy - 6, text=f"{data['flag']} {c_short}",
+                                    font=('Segoe UI', 8, 'bold'), fill="#f1f5f9", anchor='w')
+
+    def draw_2d_missiles(self, w, h):
+        active = []
+        for m in self.missiles:
+            m.update()
+            if len(m.trail_2d) >= 2:
+                pts = []
+                for (lat, lon) in m.trail_2d:
+                    sx, sy = self.project_2d_flat_point(lat, lon, w, h)
+                    pts.extend([sx, sy])
+
+                if len(pts) >= 4:
+                    self.canvas.create_line(pts, fill=m.meta["color"], width=3.5, smooth=True)
+                    self.canvas.create_line(pts, fill="#ffffff", width=1.5, smooth=True)
+                    hx, hy = pts[-2], pts[-1]
+                    self.canvas.create_oval(hx - 5, hy - 5, hx + 5, hy + 5, fill="#ffffff", outline=m.meta["color"], width=2)
+
+            if m.alive:
+                active.append(m)
+            else:
+                self.shockwaves.append(ExplosionShockwave(m.dst, m.meta["color"]))
+                if self.sound_enabled.get() and HAS_SOUND and random.random() < 0.30:
+                    try:
+                        winsound.Beep(320, 35)
+                    except Exception:
+                        pass
+        self.missiles = active
+
+    def draw_2d_shockwaves(self, w, h):
+        active = []
+        for s in self.shockwaves:
+            s.update()
+            sx, sy = self.project_2d_flat_point(s.lat, s.lon, w, h)
+            r = s.radius
+            self.canvas.create_oval(sx - r, sy - r, sx + r, sy + r, outline=s.color, width=2.5)
+            self.canvas.create_oval(sx - (r*0.6), sy - (r*0.6), sx + (r*0.6), sy + (r*0.6), outline="#ffffff", width=1.5)
+            if s.alive:
+                active.append(s)
+        self.shockwaves = active
+
+    def draw_hud_overlays(self, w, h):
         d = 30
         c_h = "#1e3a8a"
         self.canvas.create_line(20, 20, 20 + d, 20, fill=c_h, width=2)
@@ -621,12 +681,12 @@ class CyberGlobeUltra(tk.Tk):
         self.canvas.create_line(w - 20, h - 20, w - 20 - d, h - 20, fill=c_h, width=2)
         self.canvas.create_line(w - 20, h - 20, w - 20, h - 20 - d, fill=c_h, width=2)
 
-        # Legend & Guide
-        self.canvas.create_text(25, h - 35, text="🖱️ DRAG TO ROTATE 360° • SCROLL WHEEL TO ZOOM • ACTIVE REAL-TIME ATTACK MATRIX",
+        nav_guide = "🖱️ DRAG TO ROTATE 360° • SCROLL TO ZOOM" if self.view_mode == '3D' else "🗺️ 2D GLOBAL CYBER WARFARE MATRIX"
+        self.canvas.create_text(25, h - 35, text=f"{nav_guide} • 180 REAL COUNTRIES ACTIVE",
                                 font=('Segoe UI', 8, 'bold'), fill=self.c_neon_cyan, anchor='w')
 
     # -------------------------------------------------------------
-    # High-Density Automated Cyber Warfare Simulator Thread
+    # High-Density Warfare Traffic Thread
     # -------------------------------------------------------------
     def start_cyber_warfare_traffic_thread(self):
         def worker():
@@ -635,17 +695,17 @@ class CyberGlobeUltra(tk.Tk):
                 if self.defcon_level == 5:
                     interval = random.uniform(1.2, 2.0)
                 elif self.defcon_level == 3:
-                    interval = random.uniform(0.35, 0.75)  # Fast lively action!
+                    interval = random.uniform(0.30, 0.70)
                 else:  # DEFCON 1 WAR
-                    interval = random.uniform(0.08, 0.20)  # Intense swarm!
+                    interval = random.uniform(0.08, 0.20)
 
                 time.sleep(interval)
 
                 src = random.choice(city_keys)
                 dst = random.choice([k for k in city_keys if k != src])
-                meta = random.choice(ATTACK_PAYLOADS)
+                meta = random.choice(ATTACK_TYPES)
 
-                missile = LaserMissile(src, dst, meta, speed=random.uniform(0.015, 0.026))
+                missile = CyberMissile(src, dst, meta, speed=random.uniform(0.016, 0.028))
                 self.missiles.append(missile)
                 self.log_attack_event(src, dst, meta)
 
@@ -654,8 +714,8 @@ class CyberGlobeUltra(tk.Tk):
 
 
 # =====================================================================
-# Launch Entry Point
+# Main Entry Point
 # =====================================================================
 if __name__ == '__main__':
-    app = CyberGlobeUltra()
+    app = CyberWarfareCommandCenter()
     app.mainloop()
