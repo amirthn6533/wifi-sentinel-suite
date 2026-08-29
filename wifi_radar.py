@@ -28,6 +28,30 @@ except ImportError:
     HAS_SOUND = False
 
 
+# =====================================================================
+# 1D Kalman Filter for Real-Time Radar & Tracker Stabilization
+# =====================================================================
+class KalmanFilter1D:
+    """Mathematical 1D Kalman Filter to eliminate RF multipath fluctuations while preserving fast response."""
+    def __init__(self, process_variance=0.08, measurement_variance=4.0, initial_value=0.0):
+        self.q = process_variance
+        self.r = measurement_variance
+        self.x = float(initial_value)
+        self.p = 1.0
+        self.initialized = False
+
+    def update(self, measurement):
+        if not self.initialized:
+            self.x = float(measurement)
+            self.initialized = True
+            return self.x
+        p_pred = self.p + self.q
+        k = p_pred / (p_pred + self.r)
+        self.x = self.x + k * (float(measurement) - self.x)
+        self.p = (1.0 - k) * p_pred
+        return self.x
+
+
 class MacVendorLookup:
     """Detects hardware manufacturer from MAC Address OUI (Organizationally Unique Identifier)."""
     
@@ -371,6 +395,7 @@ class ModernWifiRadarApp(tk.Tk):
         self.sound_enabled = tk.BooleanVar(value=False)
         self.target_network = tk.StringVar(value="")
         self.target_history = []
+        self.tracker_kalman = {}  # bssid -> KalmanFilter1D
         self.security_filter = tk.StringVar(value="ALL")
         self.selected_interface = tk.StringVar(value="")
 
@@ -976,8 +1001,14 @@ class ModernWifiRadarApp(tk.Tk):
                 break
 
         if found:
-            sig = found['signal']
-            dbm = found['dbm']
+            bssid = found['bssid']
+            if bssid not in self.tracker_kalman:
+                self.tracker_kalman[bssid] = KalmanFilter1D(process_variance=0.08, measurement_variance=3.5, initial_value=found['signal'])
+            
+            raw_sig = found['signal']
+            sig = int(round(self.tracker_kalman[bssid].update(raw_sig)))
+            dbm = round(-100 + (sig * 0.7), 1)
+
             self.lbl_gauge_pct.config(text=f"{sig}%")
             self.lbl_gauge_dbm.config(text=f"{dbm} dBm")
             self.prog_signal['value'] = sig
@@ -986,7 +1017,7 @@ class ModernWifiRadarApp(tk.Tk):
             self.lbl_gauge_pct.config(fg=color)
 
             vendor_str = f"Vendor: {found.get('vendor', 'Unknown')}"
-            details_text = f"BSSID: {found['bssid']}\n{vendor_str}\nChannel: {found['channel']} ({found['band']})\nStandard: {found['radio']}\nSecurity: {found['auth']}"
+            details_text = f"BSSID: {found['bssid']}\n{vendor_str}\nChannel: {found['channel']} ({found['band']})\nStandard: {found['radio']}\nSecurity: {found['auth']}\n🧬 Kalman DSP: Filtered (Zero-Jitter)"
             self.lbl_tracker_details.config(text=details_text)
 
             self.target_history.append(sig)
