@@ -124,11 +124,18 @@ class CyberSuiteHub(tk.Tk):
                   command=self.launch_spy_hunter).pack(fill=tk.X, side=tk.BOTTOM)
 
         # Bottom Bar
-        footer = tk.Frame(self, bg=self.c_panel, height=32)
+        footer = tk.Frame(self, bg=self.c_panel, height=38, highlightthickness=1, highlightbackground=self.c_border)
         footer.pack(fill=tk.X, side=tk.BOTTOM)
         footer.pack_propagate(False)
-        tk.Label(footer, text="Antigravity Cyber Suite • 4-Module RF Cyber Warfare & Sensing Studio",
-                 font=('Consolas', 8), bg=self.c_panel, fg=self.c_muted).pack(pady=7)
+
+        tk.Label(footer, text="Antigravity Cyber Suite • 5-Tool Cyber Warfare & OSINT Studio",
+                 font=('Consolas', 8), bg=self.c_panel, fg=self.c_muted).pack(side=tk.LEFT, padx=15, pady=8)
+
+        btn_osint = tk.Button(footer, text="💀 Launch Elliot OSINT Recon", bg="#27272a", fg=self.c_neon_red,
+                              font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=10, pady=2, cursor='hand2',
+                              activebackground="#3f3f46", activeforeground="#ffffff",
+                              command=self.launch_osint)
+        btn_osint.pack(side=tk.RIGHT, padx=15, pady=4)
 
     def launch_motion(self):
         script = os.path.join(os.path.dirname(__file__), "wifi_motion_sensor.py")
@@ -145,6 +152,12 @@ class CyberSuiteHub(tk.Tk):
     def launch_spy_hunter(self):
         script = os.path.join(os.path.dirname(__file__), "wifi_spy_hunter.py")
         subprocess.Popen([sys.executable, script])
+
+    def launch_osint(self):
+        if os.name == 'nt':
+            os.system(f'start cmd /k "chcp 65001 > nul && title 💀 Elliot OSINT Recon && python \\"{os.path.join(os.path.dirname(__file__), "elliot_recon.py")}\\""')
+        else:
+            subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__), "elliot_recon.py")])
 
 
 if __name__ == '__main__':
