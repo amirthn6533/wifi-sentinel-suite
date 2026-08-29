@@ -1,8 +1,8 @@
-# ⚡ Wi-Fi Cyber Suite | Advanced RF Sensing, Security, Heatmap & OSINT Recon
+# ⚡ Wi-Fi Cyber Suite | Advanced RF Sensing, Security, OSINT & Biometric HUD
 
 > **Ever seen a spy movie where an agent sweeps a hotel room with a beeping gadget to find hidden bugs? That’s literally this app.**
 > 
-> A high-performance Wi-Fi surveillance, security audit, 360° radar, spectrum analyzer, **2D/3D RF Heatmap & Raytracer**, **Spy Cam & Drone Hunter**, **Mr. Robot OSINT Recon Hunter**, and **camera-less human motion detector** optimized for Realtek RTL8811AU (TP-Link High-Gain USB Antenna) and all standard Wi-Fi cards.
+> A high-performance Wi-Fi surveillance, security audit, 360° radar, spectrum analyzer, **2D/3D RF Heatmap & Raytracer**, **Spy Cam & Drone Hunter**, **Mr. Robot OSINT Recon Hunter**, **fsociety Interactive Terminal Simulator**, and **JARVIS Cyber Biometric rPPG Heart-Rate HUD** for standard webcams and Realtek RTL8811AU (TP-Link High-Gain USB Antenna).
 
 ---
 
@@ -11,7 +11,8 @@ Double-click **`RUN_WIFI_SUITE.bat`** to open the Master Hub, or run individual 
 
 | Executable File | Application | Description |
 |---|---|---|
-| **`RUN_WIFI_SUITE.bat`** | ⚡ **Master Command Center (`hub.py`)** | Central 6-module cyber dashboard to launch any module with 1 click |
+| **`RUN_WIFI_SUITE.bat`** | ⚡ **Master Command Center (`hub.py`)** | Central 7-module cyber dashboard to launch any module with 1 click |
+| **`run_biometrics.bat`** | 🫀 **Cyber Biometrics HUD (`cyber_biometrics.py`)** | Webcam rPPG heart-rate scanner, EKG pulse waveform & JARVIS HUD |
 | **`run_motion_sensor.bat`** | 🚨 **Wi-Fi Motion Sentinel (`wifi_motion_sensor.py`)** | RF wave seismograph, 5s noise calibration, burglar alarm |
 | **`run_radar.bat`** | 📡 **Wi-Fi Radar & Security (`wifi_radar.py`)** | 360° radar, spectrum analyzer, Evil Twin detection, vendor OUI |
 | **`run_heatmap.bat`** | 🗺️ **Wi-Fi 2D/3D Heatmap (`wifi_heatmap.py`)** | Interactive floorplan, RF Raytracer, AI AP locator, 3D surface |
@@ -23,40 +24,50 @@ Double-click **`RUN_WIFI_SUITE.bat`** to open the Master Hub, or run individual 
 
 ## ✨ Key Modules & Features:
 
-### 1. 🚨 Wi-Fi Motion Sentinel (`wifi_motion_sensor.py`)
+### 1. 🫀 Cyber Biometric rPPG Heart-Rate HUD (`cyber_biometrics.py`)
+- **Remote Photoplethysmography (rPPG):** Measures human pulse rate non-invasively through standard webcam video by analyzing microscopic green light absorption ($\approx 530\text{nm}$) variations across facial capillaries.
+- **Butterworth Bandpass & FFT DSP:** Strips away ambient 50/60Hz indoor lighting noise and isolates true cardiac frequencies ($45 - 180\text{ BPM}$).
+- **1D Kalman Filter Anti-Jitter:** Stabilizes estimated heart rate for smooth clinical tracking.
+- **Iron Man / JARVIS HUD:** Holographic targeting reticles, animated scanlines, and rolling real-time EKG capillary waveform graph.
+- **Synchronized Heartbeat Audio:** Auditory heartbeat pulse synthesizer matching your real cardiac rhythm.
+
+### 2. 🚨 Wi-Fi Motion Sentinel (`wifi_motion_sensor.py`)
 - **Real-Time RF Seismograph (40 FPS Custom Canvas):** Plots ultra-smooth RF perturbations caused by human body movement.
 - **Segmented LED Energy Gauge (0-100%):** Color-shifting LED bar (Green ➔ Amber ➔ Red) for real-time perturbation intensity.
 - **360° Sonar Pulse Radar:** Pulsing sonar sweep with shockwave rings on motion discovery.
 - **5s Baseline Noise Calibration:** Profiles the quiescent environment for zero false alarms.
 - **Armed Burglar Alarm:** Arm countdown with audio cyber siren alerts (`winsound`).
 
-### 2. 📡 Wi-Fi Radar & Security Audit (`wifi_radar.py`)
+### 3. 📡 Wi-Fi Radar & Security Audit (`wifi_radar.py`)
 - **360° Dynamic Radar:** Visualizes surrounding APs based on distance (signal strength) and Wi-Fi channel.
 - **Evil Twin & Rogue AP Detector:** Detects duplicate SSIDs with conflicting encryption schemes (phishing/honeypots) or mismatched hardware vendors.
 - **MAC OUI Vendor Lookup:** Automatic manufacturer identification (TP-Link, Huawei, ZTE, Cisco, Apple, Xiaomi, MikroTik, Sagemcom, etc.).
 - **Dual-Band Spectrum Analyzer (2.4 GHz & 5 GHz):** Plots channel overlap curves and recommends the cleanest interference-free channel.
 - **Signal Direction Finder (Geiger Tracker):** Live RSSI tracking gauge with audible Geiger beeps and 1D Kalman DSP smoothing.
 
-### 3. 🗺️ Wi-Fi 2D/3D Heatmap & RF Raytracer (`wifi_heatmap.py`)
+### 4. 🗺️ Wi-Fi 2D/3D Heatmap & RF Raytracer (`wifi_heatmap.py`)
 - **Interactive Floorplan Designer:** Draw walls with real physical materials (Concrete 12dB, Brick 7dB, Drywall 3dB, Metal Shield 26dB, Glass 2dB, Wood 4dB).
 - **RF Raytracer & Wave Physics Engine:** Simulates Free-Space Path Loss (FSPL) and multi-wall attenuation for 2.4 GHz and 5.0 GHz bands with specular multi-reflection bounce rays.
 - **Live Survey Walk-Through Mode:** Sample live Wi-Fi RSSI from your active adapter or TP-Link antenna as you walk across rooms.
 - **AI Optimal Router Placement Locator:** Analyzes floorplan geometry and obstacles to pinpoint the ideal coordinates that eliminate dead zones.
 - **3D Spatial Elevation Mesh:** Renders interactive 3D topological heightmaps showing RF peaks and dead-zone canyons.
 
-### 4. 🕵️‍♂️ Spy Cam & Drone RF Hunter (`wifi_spy_hunter.py`)
+### 5. 🕵️‍♂️ Spy Cam & Drone RF Hunter (`wifi_spy_hunter.py`)
 - **Surveillance Chipset Fingerprinter:** Identifies MAC addresses from 60+ known hidden camera vendors (Espressif ESP32/8266, Tuya, V380, Xiongmai, Anyka, Allwinner, Hikvision, Dahua).
 - **Drone & UAV Detector:** Identifies telemetry and Wi-Fi FPV streams from DJI (Mavic/Mini/Phantom), Parrot, Autel, Hubsan, and FPV drones.
 - **Directional Geiger Homing Compass:** Target-locks suspicious devices and plays real-time audio Geiger clicks that speed up as you point your antenna toward the physical bug.
 - **1D Kalman Filter Anti-Jitter:** Mathematical smoothing for rock-solid signal tracking.
 - **Proximity Range Alert:** Classifies distance into `< 1m (Search Objects!)`, `1-3m (In This Room)`, and `> 5m (Distant)`.
 
-### 5. 💀 Elliot OSINT & Digital Footprint Hunter (`elliot_recon.py`)
+### 6. 🔍 Elliot OSINT & Digital Footprint Hunter (`elliot_recon.py`)
 Remember how Elliot in *Mr. Robot* would sit in front of his black terminal, type a single username, and pull up someone's entire digital footprint across the internet in seconds? I wanted that exact capability in real life, so I built it.
 
 Most people use the same handle across dev hubs, gaming networks, socials, and forums without realizing how much data they leave scattered across the web. Instead of manually searching through dozens of websites, my tool automates the entire investigation in under three seconds.
 
 Under the hood, the engine deploys thirty-five parallel worker threads that simultaneously probe over a hundred high-value platforms, ranging from GitHub, Reddit, and Telegram to Steam, Spotify, and HackTheBox. Rather than relying solely on simple status codes, it inspects server response headers and HTML body signatures to filter out fake redirects and only report verified, active profiles. It also handles email reconnaissance by calculating real-time MD5 hashes to query global identity databases, pulling registered avatars, display names, and public bios. The moment the scan finishes, everything is compiled into a clean investigation dossier ready for review.
+
+### 7. 💀 fsociety Interactive Hack Terminal (`fsociety_terminal.py`)
+A story-driven, immersive cyber terminal CTF simulator based on *Mr. Robot*. Features mechanical keyboard sound effects, CRT scanline aesthetics, Linux shell commands (`scan`, `nmap`, `crack`, `ssh`, `decrypt`, `override`, `inject`, `execute`), and a 3-mission campaign culminating in the global E-Corp 5/9 hack with animated Matrix rain.
 
 ---
 
