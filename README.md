@@ -11,12 +11,13 @@ Double-click **`RUN_WIFI_SUITE.bat`** to open the Master Hub, or run individual 
 
 | Executable File | Application | Description |
 |---|---|---|
-| **`RUN_WIFI_SUITE.bat`** | ⚡ **Master Command Center (`hub.py`)** | Central 5-tool cyber dashboard to launch any module with 1 click |
+| **`RUN_WIFI_SUITE.bat`** | ⚡ **Master Command Center (`hub.py`)** | Central 6-module cyber dashboard to launch any module with 1 click |
 | **`run_motion_sensor.bat`** | 🚨 **Wi-Fi Motion Sentinel (`wifi_motion_sensor.py`)** | RF wave seismograph, 5s noise calibration, burglar alarm |
 | **`run_radar.bat`** | 📡 **Wi-Fi Radar & Security (`wifi_radar.py`)** | 360° radar, spectrum analyzer, Evil Twin detection, vendor OUI |
 | **`run_heatmap.bat`** | 🗺️ **Wi-Fi 2D/3D Heatmap (`wifi_heatmap.py`)** | Interactive floorplan, RF Raytracer, AI AP locator, 3D surface |
 | **`run_spy_hunter.bat`** | 🕵️‍♂️ **Spy Cam & Drone Hunter (`wifi_spy_hunter.py`)** | Directional Geiger bug sweep, pinhole cam OUI fingerprinting, drone detector |
-| **`run_osint_recon.bat`** | 💀 **Elliot OSINT Hunter (`elliot_recon.py`)** | 100+ platforms asynchronous digital footprint & email recon |
+| **`run_osint_recon.bat`** | 🔍 **Elliot OSINT Hunter (`elliot_recon.py`)** | 100+ platforms asynchronous digital footprint & email recon |
+| **`run_fsociety_game.bat`** | 💀 **fsociety Hack Terminal (`fsociety_terminal.py`)** | Interactive Mr. Robot hacking game & story-driven CTF terminal |
 
 ---
 

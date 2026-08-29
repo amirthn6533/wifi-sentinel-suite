@@ -1,27 +1,40 @@
 # 🕵️‍♂️ Digital Footprint Dossier: `amirthn653381`
-- **Date & Time:** 2026-08-29 13:28:03
-- **Scan Duration:** 5.03 seconds
-- **Platforms Scanned:** 53
-- **Active Profiles Located:** 16
+- **Date & Time:** 2026-08-29 13:32:51
+- **Scan Duration:** 11.22 seconds
+- **Platforms Scanned:** 103
+- **Active Profiles Located:** 29
 
 ## 🌐 Discovered Online Presence
 
 | Platform | Category | Profile URL | Status |
 |---|---|---|---|
+| **AniList** | Anime | [https://anilist.co/user/amirthn653381/](https://anilist.co/user/amirthn653381/) | ✅ Active |
 | **Archive.org** | Archive | [https://archive.org/details/@amirthn653381](https://archive.org/details/@amirthn653381) | ✅ Active |
-| **ArtStation** | Creative | [https://www.artstation.com/amirthn653381](https://www.artstation.com/amirthn653381) | ✅ Active |
+| **Beacons** | Bio | [https://beacons.ai/amirthn653381](https://beacons.ai/amirthn653381) | ✅ Active |
 | **500px** | Creative | [https://500px.com/p/amirthn653381](https://500px.com/p/amirthn653381) | ✅ Active |
+| **ArtStation** | Creative | [https://www.artstation.com/amirthn653381](https://www.artstation.com/amirthn653381) | ✅ Active |
+| **Rarible** | Crypto | [https://rarible.com/amirthn653381](https://rarible.com/amirthn653381) | ✅ Active |
+| **TryHackMe** | Cyber | [https://tryhackme.com/p/amirthn653381](https://tryhackme.com/p/amirthn653381) | ✅ Active |
+| **PyPI** | Dev | [https://pypi.org/user/amirthn653381](https://pypi.org/user/amirthn653381) | ✅ Active |
 | **Codeforces** | Dev | [https://codeforces.com/profile/amirthn653381](https://codeforces.com/profile/amirthn653381) | ✅ Active |
 | **Replit** | Dev | [https://replit.com/@amirthn653381](https://replit.com/@amirthn653381) | ✅ Active |
-| **PyPI** | Dev | [https://pypi.org/user/amirthn653381](https://pypi.org/user/amirthn653381) | ✅ Active |
 | **Kaggle** | Dev | [https://www.kaggle.com/amirthn653381](https://www.kaggle.com/amirthn653381) | ✅ Active |
+| **GeeksForGeeks** | Dev | [https://auth.geeksforgeeks.org/user/amirthn653381](https://auth.geeksforgeeks.org/user/amirthn653381) | ✅ Active |
+| **Duolingo** | Education | [https://www.duolingo.com/profile/amirthn653381](https://www.duolingo.com/profile/amirthn653381) | ✅ Active |
+| **Codecademy** | Education | [https://www.codecademy.com/profiles/amirthn653381](https://www.codecademy.com/profiles/amirthn653381) | ✅ Active |
+| **KhanAcademy** | Education | [https://www.khanacademy.org/profile/amirthn653381](https://www.khanacademy.org/profile/amirthn653381) | ✅ Active |
 | **Steam** | Gaming | [https://steamcommunity.com/id/amirthn653381](https://steamcommunity.com/id/amirthn653381) | ✅ Active |
-| **Spotify** | Music | [https://open.spotify.com/user/amirthn653381](https://open.spotify.com/user/amirthn653381) | ✅ Active |
+| **GameJolt** | Gaming | [https://gamejolt.com/@amirthn653381](https://gamejolt.com/@amirthn653381) | ✅ Active |
+| **NexusMods** | Gaming | [https://www.nexusmods.com/users/amirthn653381](https://www.nexusmods.com/users/amirthn653381) | ✅ Active |
+| **Imgur** | Media | [https://imgur.com/user/amirthn653381](https://imgur.com/user/amirthn653381) | ✅ Active |
+| **Trakt.tv** | Media | [https://trakt.tv/users/amirthn653381](https://trakt.tv/users/amirthn653381) | ✅ Active |
 | **Mixcloud** | Music | [https://www.mixcloud.com/amirthn653381/](https://www.mixcloud.com/amirthn653381/) | ✅ Active |
+| **Audiomack** | Music | [https://audiomack.com/amirthn653381](https://audiomack.com/amirthn653381) | ✅ Active |
+| **Spotify** | Music | [https://open.spotify.com/user/amirthn653381](https://open.spotify.com/user/amirthn653381) | ✅ Active |
 | **WordPress** | Publishing | [https://amirthn653381.wordpress.com](https://amirthn653381.wordpress.com) | ✅ Active |
 | **Medium** | Social | [https://medium.com/@amirthn653381](https://medium.com/@amirthn653381) | ✅ Active |
-| **Pinterest** | Social | [https://www.pinterest.com/amirthn653381/](https://www.pinterest.com/amirthn653381/) | ✅ Active |
 | **Twitch** | Social | [https://www.twitch.tv/amirthn653381](https://www.twitch.tv/amirthn653381) | ✅ Active |
+| **Pinterest** | Social | [https://www.pinterest.com/amirthn653381/](https://www.pinterest.com/amirthn653381/) | ✅ Active |
 | **Threads** | Social | [https://www.threads.net/@amirthn653381](https://www.threads.net/@amirthn653381) | ✅ Active |
 | **Weibo** | Social | [https://weibo.com/amirthn653381](https://weibo.com/amirthn653381) | ✅ Active |
 
