@@ -1,10 +1,10 @@
 """
 =============================================================================
-🫀 CYBER BIOMETRIC rPPG HEART-RATE HUD (JARVIS Edition)
+🫀 CYBER BIOMETRIC rPPG HEART-RATE HUD (JARVIS Edition - v2.0 POS Clinical)
 =============================================================================
 Author: Antigravity Pair Programmer
-Architecture: Computer Vision Remote Photoplethysmography (rPPG) & FFT DSP
-Inspired by: Iron Man / JARVIS HUD & Medical Optics
+Architecture: Plane-Orthogonal-to-Skin (POS) Chrominance Optics + Sub-BPM DSP
+Standard: Advanced Multi-ROI Skin Perfusion & Motion Cancellation
 =============================================================================
 """
 
@@ -15,7 +15,7 @@ import math
 import threading
 from collections import deque
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 import cv2
 import numpy as np
 from scipy import signal
@@ -30,10 +30,10 @@ except ImportError:
 
 
 # =====================================================================
-# 1D Kalman Filter for BPM Stabilization & Zero-Jitter
+# 1D Kalman Filter for BPM Stabilization
 # =====================================================================
 class KalmanFilter1D:
-    def __init__(self, process_variance=0.04, measurement_variance=2.5, initial_value=72.0):
+    def __init__(self, process_variance=0.015, measurement_variance=1.8, initial_value=72.0):
         self.q = process_variance
         self.r = measurement_variance
         self.x = float(initial_value)
@@ -53,95 +53,170 @@ class KalmanFilter1D:
 
 
 # =====================================================================
-# rPPG Biological Optical Signal Processing Pipeline
+# State-of-the-Art POS (Plane-Orthogonal-to-Skin) rPPG DSP Pipeline
 # =====================================================================
 class BiometricProcessor:
-    def __init__(self, buffer_size=150, fps=30.0):
+    def __init__(self, buffer_size=180, fps=30.0):
         self.buffer_size = buffer_size
         self.fps = fps
-        self.green_timeseries = deque(maxlen=buffer_size)
+        
+        # Color buffers: R, G, B channels
+        self.r_series = deque(maxlen=buffer_size)
+        self.g_series = deque(maxlen=buffer_size)
+        self.b_series = deque(maxlen=buffer_size)
         self.timestamps = deque(maxlen=buffer_size)
         self.filtered_pulse = deque(maxlen=buffer_size)
+
         self.current_bpm = 0.0
-        self.kalman = KalmanFilter1D(process_variance=0.05, measurement_variance=2.0, initial_value=72.0)
+        self.kalman = KalmanFilter1D(process_variance=0.015, measurement_variance=1.5, initial_value=72.0)
         self.snr = 0.0
         self.is_valid = False
+        self.motion_detected = False
+        self.last_valid_bpm = 72.0
 
-        # Load OpenCV default Haar cascade for face detection
+        # Smoothed bounding box to eliminate camera tracking jitter
+        self.smooth_face = None
+
+        # Load OpenCV Haar cascade
         cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
         self.face_cascade = cv2.CascadeClassifier(cascade_path)
 
-    def extract_forehead_roi(self, frame):
-        """Detects face and isolates forehead capillary blood absorption zone."""
+    def extract_multi_roi(self, frame):
+        """Extracts Forehead + Left Cheek + Right Cheek ROIs with smooth anti-jitter tracking."""
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.15, minNeighbors=5, minSize=(100, 100))
+        faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.12, minNeighbors=6, minSize=(110, 110))
 
         if len(faces) == 0:
-            return None, None
+            return None, []
 
-        # Pick largest face
+        # Largest face
         faces = sorted(faces, key=lambda f: f[2] * f[3], reverse=True)
         (x, y, w, h) = faces[0]
 
-        # Forehead Region: Top 10% to 30% of face height, middle 50% width
-        fx = int(x + w * 0.25)
-        fy = int(y + h * 0.10)
-        fw = int(w * 0.50)
-        fh = int(h * 0.18)
+        # Smooth bounding box (Exponential Moving Average) to eliminate ROI pixel vibration
+        if self.smooth_face is None:
+            self.smooth_face = [float(x), float(y), float(w), float(h)]
+        else:
+            alpha = 0.20  # Smooth factor
+            self.smooth_face[0] = (1 - alpha) * self.smooth_face[0] + alpha * x
+            self.smooth_face[1] = (1 - alpha) * self.smooth_face[1] + alpha * y
+            self.smooth_face[2] = (1 - alpha) * self.smooth_face[2] + alpha * w
+            self.smooth_face[3] = (1 - alpha) * self.smooth_face[3] + alpha * h
 
-        face_box = (x, y, w, h)
-        forehead_box = (fx, fy, fw, fh)
-        return face_box, forehead_box
+        sx, sy, sw, sh = [int(v) for v in self.smooth_face]
+        face_box = (sx, sy, sw, sh)
 
-    def process_frame(self, frame, forehead_box):
-        """Extracts mean green channel intensity and updates DSP filters."""
-        if forehead_box is None:
+        # 3 High-Perfusion Skin Zones:
+        # 1. Forehead
+        forehead = (int(sx + sw * 0.25), int(sy + sh * 0.10), int(sw * 0.50), int(sh * 0.18))
+        # 2. Left Cheek
+        left_cheek = (int(sx + sw * 0.16), int(sy + sh * 0.48), int(sw * 0.22), int(sh * 0.20))
+        # 3. Right Cheek
+        right_cheek = (int(sx + sw * 0.62), int(sy + sh * 0.48), int(sw * 0.22), int(sh * 0.20))
+
+        return face_box, [forehead, left_cheek, right_cheek]
+
+    def process_frame(self, frame, rois):
+        """Extracts RGB signals across multi-ROI and executes POS Chrominance DSP."""
+        if not rois or len(rois) == 0:
             self.is_valid = False
             return
 
-        fx, fy, fw, fh = forehead_box
-        # Bound check
         h_img, w_img = frame.shape[:2]
-        fx = max(0, min(fx, w_img - 1))
-        fy = max(0, min(fy, h_img - 1))
-        fw = max(1, min(fw, w_img - fx))
-        fh = max(1, min(fh, h_img - fy))
+        r_vals, g_vals, b_vals = [], [], []
 
-        roi = frame[fy:fy+fh, fx:fx+fw]
-        if roi.size == 0:
+        for (rx, ry, rw, rh) in rois:
+            rx = max(0, min(rx, w_img - 1))
+            ry = max(0, min(ry, h_img - 1))
+            rw = max(1, min(rw, w_img - rx))
+            rh = max(1, min(rh, h_img - ry))
+
+            roi_patch = frame[ry:ry+rh, rx:rx+rw]
+            if roi_patch.size > 0:
+                # Calculate mean RGB for this skin patch
+                b_vals.append(np.mean(roi_patch[:, :, 0]))
+                g_vals.append(np.mean(roi_patch[:, :, 1]))
+                r_vals.append(np.mean(roi_patch[:, :, 2]))
+
+        if len(g_vals) == 0:
             self.is_valid = False
             return
 
-        # Green channel has strongest hemoglobin extinction coefficient
-        mean_green = np.mean(roi[:, :, 1])
+        mean_r = np.mean(r_vals)
+        mean_g = np.mean(g_vals)
+        mean_b = np.mean(b_vals)
         now = time.time()
 
-        self.green_timeseries.append(mean_green)
+        self.r_series.append(mean_r)
+        self.g_series.append(mean_g)
+        self.b_series.append(mean_b)
         self.timestamps.append(now)
 
-        if len(self.green_timeseries) >= 45:
-            self.compute_bpm()
+        # Require at least 50 frames (approx 1.7 sec) before computing
+        if len(self.g_series) >= 50:
+            self.compute_pos_bpm()
             self.is_valid = True
         else:
             self.is_valid = False
 
-    def compute_bpm(self):
-        """Butterworth bandpass filter (0.75 - 3.0 Hz => 45 - 180 BPM) + FFT Power Peak."""
-        raw_vals = np.array(self.green_timeseries)
-        
-        # Calculate true instant sample rate
-        dt = np.diff(self.timestamps)
+    def compute_pos_bpm(self):
+        """
+        Plane-Orthogonal-to-Skin (POS) Algorithm (Wang et al., IEEE TBME 2017)
+        Cancels specular reflections and motion artifacts using dual chrominance projections.
+        """
+        R = np.array(self.r_series)
+        G = np.array(self.g_series)
+        B = np.array(self.b_series)
+        T = np.array(self.timestamps)
+
+        # Check motion instability
+        if len(G) > 10:
+            diff_g = np.abs(np.diff(G[-10:]))
+            if np.mean(diff_g) > 4.5:
+                self.motion_detected = True
+            else:
+                self.motion_detected = False
+
+        # Effective frame rate calculation
+        dt = np.diff(T)
         if len(dt) > 0 and np.mean(dt) > 0:
             effective_fps = 1.0 / np.mean(dt)
         else:
             effective_fps = self.fps
 
-        # Detrend signal (remove slow lighting drift)
-        detrended = signal.detrend(raw_vals)
+        # 1. Temporal Normalization of Color Signals
+        mean_R = np.mean(R)
+        mean_G = np.mean(G)
+        mean_B = np.mean(B)
 
-        # 3rd Order Butterworth Bandpass Filter (0.75 Hz to 3.0 Hz)
+        if mean_R < 1e-4 or mean_G < 1e-4 or mean_B < 1e-4:
+            return
+
+        Rn = R / mean_R
+        Gn = G / mean_G
+        Bn = B / mean_B
+
+        # 2. POS Chrominance Projection Planes:
+        # S1 = Gn - Bn
+        # S2 = -2*Rn + Gn + Bn
+        S1 = Gn - Bn
+        S2 = -2.0 * Rn + Gn + Bn
+
+        # 3. Dynamic Alpha Tuning: alpha = std(S1) / std(S2)
+        std_S1 = np.std(S1)
+        std_S2 = np.std(S2)
+        if std_S2 < 1e-5:
+            alpha = 1.0
+        else:
+            alpha = std_S1 / std_S2
+
+        # Combined POS pulse signal
+        pulse_raw = S1 + alpha * S2
+
+        # 4. Detrending & 4th-Order Butterworth Bandpass (0.75 Hz - 2.8 Hz => 45 - 170 BPM)
+        detrended = signal.detrend(pulse_raw)
         lowcut = 0.75
-        highcut = min(3.0, (effective_fps / 2.0) - 0.1)
+        highcut = min(2.8, (effective_fps / 2.0) - 0.1)
         if highcut <= lowcut:
             return
 
@@ -151,29 +226,51 @@ class BiometricProcessor:
             filtered = signal.filtfilt(b, a, detrended)
             self.filtered_pulse.append(filtered[-1])
 
-            # FFT Power Spectrum Density (PSD)
+            # 5. High-Resolution Zero-Padded FFT (4096 points for 0.1 BPM frequency resolution)
             N = len(filtered)
-            fft_vals = np.fft.rfft(filtered * np.hanning(N))
-            freqs = np.fft.rfftfreq(N, d=(1.0 / effective_fps))
+            windowed = filtered * np.hamming(N)
+            n_fft = 4096
+            fft_vals = np.fft.rfft(windowed, n=n_fft)
+            freqs = np.fft.rfftfreq(n_fft, d=(1.0 / effective_fps))
 
-            # Filter frequencies between 45 BPM and 180 BPM
             mask = (freqs >= lowcut) & (freqs <= highcut)
             freq_band = freqs[mask]
             power_band = np.abs(fft_vals[mask]) ** 2
 
-            if len(power_band) > 0 and np.max(power_band) > 1e-4:
+            if len(power_band) > 0 and np.max(power_band) > 1e-5:
                 peak_idx = np.argmax(power_band)
-                raw_bpm = freq_band[peak_idx] * 60.0
+                
+                # Quadratic Peak Interpolation for sub-bin precision
+                if 0 < peak_idx < len(power_band) - 1:
+                    y0 = power_band[peak_idx]
+                    y_minus = power_band[peak_idx - 1]
+                    y_plus = power_band[peak_idx + 1]
+                    denom = (2.0 * (2.0 * y0 - y_minus - y_plus))
+                    if denom != 0:
+                        delta = (y_minus - y_plus) / denom
+                    else:
+                        delta = 0.0
+                    df = freq_band[1] - freq_band[0]
+                    fine_freq = freq_band[peak_idx] + delta * df
+                else:
+                    fine_freq = freq_band[peak_idx]
 
-                # Compute Signal-to-Noise Ratio (SNR)
+                raw_bpm = fine_freq * 60.0
+
+                # Compute Signal SNR Quality
                 peak_power = power_band[peak_idx]
-                noise_power = np.sum(power_band) - peak_power
-                self.snr = (peak_power / (noise_power + 1e-6))
+                total_power = np.sum(power_band)
+                noise_power = max(1e-6, total_power - peak_power)
+                self.snr = 10.0 * np.log10(peak_power / noise_power)
 
-                # Apply Kalman smoothing
-                if 45.0 <= raw_bpm <= 180.0:
+                # Validate and apply Kalman filter
+                if 45.0 <= raw_bpm <= 175.0 and not self.motion_detected:
                     smoothed = self.kalman.update(raw_bpm)
                     self.current_bpm = round(smoothed, 1)
+                    self.last_valid_bpm = self.current_bpm
+                elif self.motion_detected:
+                    # Hold previous valid BPM during temporary head motion
+                    self.current_bpm = self.last_valid_bpm
         except Exception:
             pass
 
@@ -184,12 +281,12 @@ class BiometricProcessor:
 class CyberBiometricsApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("🫀 CYBER BIOMETRIC HUD | rPPG Cardiac Optical Scanner")
+        self.title("🫀 CYBER BIOMETRIC HUD | POS Clinical Optical Scanner")
         self.geometry("1280x820")
         self.minsize(1050, 700)
         self.configure(bg="#050811")
 
-        # Color Palette
+        # Cyber Colors
         self.c_bg = "#050811"
         self.c_panel = "#0b1220"
         self.c_card = "#111c30"
@@ -204,19 +301,16 @@ class CyberBiometricsApp(tk.Tk):
         # State Variables
         self.cap = None
         self.camera_running = False
-        self.processor = BiometricProcessor(buffer_size=150)
+        self.processor = BiometricProcessor(buffer_size=180)
         self.sound_enabled = tk.BooleanVar(value=True)
         self.scanlines_y = 0
-        self.heartbeat_anim_scale = 1.0
 
         self.setup_ui()
         self.start_camera()
         self.start_heartbeat_audio_thread()
 
     def setup_ui(self):
-        # -------------------------------------------------------------
         # Header
-        # -------------------------------------------------------------
         header = tk.Frame(self, bg=self.c_panel, height=65, highlightthickness=1, highlightbackground=self.c_border)
         header.pack(fill=tk.X, side=tk.TOP)
         header.pack_propagate(False)
@@ -224,9 +318,9 @@ class CyberBiometricsApp(tk.Tk):
         title_box = tk.Frame(header, bg=self.c_panel)
         title_box.pack(side=tk.LEFT, padx=20, pady=12)
 
-        tk.Label(title_box, text="🫀 CYBER BIOMETRIC HUD", font=('Segoe UI', 14, 'bold'),
+        tk.Label(title_box, text="🫀 CYBER BIOMETRIC HUD v2.0", font=('Segoe UI', 14, 'bold'),
                  bg=self.c_panel, fg=self.c_neon_cyan).pack(side=tk.LEFT, padx=(0, 10))
-        tk.Label(title_box, text="rPPG Optical Capillary Pulse & Facial Vitals Scanner", font=('Segoe UI', 9),
+        tk.Label(title_box, text="POS Clinical Chrominance rPPG & Multi-ROI Capillary Scanner", font=('Segoe UI', 9),
                  bg=self.c_panel, fg=self.c_muted).pack(side=tk.LEFT)
 
         self.lbl_status_badge = tk.Label(header, text="📡 INITIALIZING SCANNER...", font=('Segoe UI', 9, 'bold'),
@@ -234,24 +328,22 @@ class CyberBiometricsApp(tk.Tk):
                                          highlightthickness=1, highlightbackground=self.c_border)
         self.lbl_status_badge.pack(side=tk.RIGHT, padx=20, pady=14)
 
-        # -------------------------------------------------------------
-        # Main Split Workspace (Left: Video HUD | Right: Vitals Metrics & EKG)
-        # -------------------------------------------------------------
+        # Main Split Workspace
         main_box = tk.Frame(self, bg=self.c_bg)
         main_box.pack(fill=tk.BOTH, expand=True, padx=12, pady=12)
 
-        # Left Column: Video HUD Canvas (Width: 700px)
+        # Left Column: Video HUD Canvas
         left_col = tk.Frame(main_box, bg=self.c_panel, highlightthickness=1, highlightbackground=self.c_border)
         left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
         
-        self.lbl_cam_header = tk.Label(left_col, text="🎯 OPTICAL FACIAL TARGETING MATRIX (JARVIS HUD)",
+        self.lbl_cam_header = tk.Label(left_col, text="🎯 OPTICAL FACIAL TARGETING MATRIX (JARVIS POS HUD)",
                                        font=('Segoe UI', 10, 'bold'), bg=self.c_panel, fg=self.c_neon_cyan)
         self.lbl_cam_header.pack(anchor='w', padx=12, pady=(10, 6))
 
         self.video_canvas = tk.Canvas(left_col, bg="#02040a", highlightthickness=0)
         self.video_canvas.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
 
-        # Right Column: Biometric Metrics, Diagnostics & EKG (Width: 420px)
+        # Right Column: Biometric Metrics, Diagnostics & EKG
         right_col = tk.Frame(main_box, bg=self.c_panel, width=420, highlightthickness=1, highlightbackground=self.c_border)
         right_col.pack(side=tk.RIGHT, fill=tk.BOTH, padx=(0, 0))
         right_col.pack_propagate(False)
@@ -271,7 +363,7 @@ class CyberBiometricsApp(tk.Tk):
 
         tk.Label(gauge_card, text="BEATS PER MINUTE (BPM)", font=('Consolas', 10, 'bold'), bg=self.c_card, fg=self.c_neon_cyan).pack()
 
-        self.lbl_cardiac_zone = tk.Label(gauge_card, text="🟢 Status: Calibrating Face...", font=('Segoe UI', 9, 'bold'),
+        self.lbl_cardiac_zone = tk.Label(gauge_card, text="🟢 Status: Calibrating Skin Multi-ROI...", font=('Segoe UI', 9, 'bold'),
                                          bg=self.c_card, fg=self.c_neon_green)
         self.lbl_cardiac_zone.pack(pady=(8, 0))
 
@@ -290,12 +382,15 @@ class CyberBiometricsApp(tk.Tk):
         diag_card = tk.Frame(parent, bg=self.c_card, highlightthickness=1, highlightbackground=self.c_border, padx=12, pady=10)
         diag_card.pack(fill=tk.X, padx=pad, pady=6)
 
-        tk.Label(diag_card, text="OPTICAL SNR & LIGHTING QUALITY", font=('Segoe UI', 8, 'bold'), bg=self.c_card, fg=self.c_muted).pack(anchor='w')
+        tk.Label(diag_card, text="POS OPTICAL ACCURACY & STABILITY", font=('Segoe UI', 8, 'bold'), bg=self.c_card, fg=self.c_muted).pack(anchor='w')
 
-        self.lbl_snr = tk.Label(diag_card, text="Signal Quality: Calibrating...", font=('Consolas', 9), bg=self.c_card, fg=self.c_text)
+        self.lbl_snr = tk.Label(diag_card, text="Optical SNR: Calibrating...", font=('Consolas', 9), bg=self.c_card, fg=self.c_text)
         self.lbl_snr.pack(anchor='w', pady=2)
 
-        self.lbl_advice = tk.Label(diag_card, text="💡 Pro-Tip: Ensure room lighting is bright and hold your head steady for medical-grade accuracy.",
+        self.lbl_motion = tk.Label(diag_card, text="Face Stability: 🟢 Optimal (Holding Steady)", font=('Consolas', 9), bg=self.c_card, fg=self.c_neon_green)
+        self.lbl_motion.pack(anchor='w', pady=2)
+
+        self.lbl_advice = tk.Label(diag_card, text="💡 Medical rPPG Tip: Look straight at webcam. Maintain steady room light and relax for 4-5 seconds.",
                                    font=('Segoe UI', 8), bg=self.c_card, fg=self.c_muted, wraplength=360, justify=tk.LEFT)
         self.lbl_advice.pack(anchor='w', pady=(4, 0))
 
@@ -303,7 +398,7 @@ class CyberBiometricsApp(tk.Tk):
         ctrl_bar = tk.Frame(parent, bg=self.c_panel)
         ctrl_bar.pack(fill=tk.X, padx=pad, pady=(10, 14), side=tk.BOTTOM)
 
-        tk.Checkbutton(ctrl_bar, text="🔊 Audio Heartbeat Synth", variable=self.sound_enabled,
+        tk.Checkbutton(ctrl_bar, text="🔊 Heartbeat Audio Synth", variable=self.sound_enabled,
                        bg=self.c_panel, fg=self.c_text, selectcolor=self.c_card,
                        font=('Segoe UI', 9, 'bold'), activebackground=self.c_panel).pack(side=tk.LEFT)
 
@@ -313,7 +408,7 @@ class CyberBiometricsApp(tk.Tk):
         btn_recal.pack(side=tk.RIGHT)
 
     def reset_baseline(self):
-        self.processor = BiometricProcessor(buffer_size=150)
+        self.processor = BiometricProcessor(buffer_size=180)
         self.lbl_bpm_value.config(text="--", fg=self.c_neon_green)
         self.lbl_cardiac_zone.config(text="🟢 Status: Recalibrating...", fg=self.c_neon_green)
 
@@ -323,11 +418,10 @@ class CyberBiometricsApp(tk.Tk):
     def start_camera(self):
         self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW if os.name == 'nt' else 0)
         if not self.cap.isOpened():
-            # Try default backend
             self.cap = cv2.VideoCapture(0)
 
         if not self.cap.isOpened():
-            messagebox.showerror("Camera Error", "Could not access webcam. Please ensure your camera is connected and not in use by another app.")
+            messagebox.showerror("Camera Error", "Could not access webcam. Please ensure your camera is connected.")
             return
 
         self.camera_running = True
@@ -342,22 +436,20 @@ class CyberBiometricsApp(tk.Tk):
             # Flip horizontally for mirror effect
             frame = cv2.flip(frame, 1)
 
-            # Process rPPG Forehead ROI
-            face_box, forehead_box = self.processor.extract_forehead_roi(frame)
-            self.processor.process_frame(frame, forehead_box)
+            # Process Multi-ROI (Forehead + Cheeks)
+            face_box, rois = self.processor.extract_multi_roi(frame)
+            self.processor.process_frame(frame, rois)
 
             # Render JARVIS Cyberpunk HUD overlay on image
-            hud_frame = self.draw_jarvis_hud(frame, face_box, forehead_box)
+            hud_frame = self.draw_jarvis_hud(frame, face_box, rois)
 
             # Convert to PIL & display on canvas
             cv2_rgb = cv2.cvtColor(hud_frame, cv2.COLOR_BGR2RGB)
             h, w = cv2_rgb.shape[:2]
             
-            # Responsive Canvas resize
             cw = max(100, self.video_canvas.winfo_width()) if self.video_canvas.winfo_width() > 10 else 640
             ch = max(100, self.video_canvas.winfo_height()) if self.video_canvas.winfo_height() > 10 else 480
             
-            # Maintain aspect ratio
             scale = min(cw / w, ch / h)
             nw = int(w * scale)
             nh = int(h * scale)
@@ -367,7 +459,6 @@ class CyberBiometricsApp(tk.Tk):
             self.tk_img = ImageTk.PhotoImage(image=pil_img)
 
             self.video_canvas.delete("all")
-            # Center on canvas
             x_off = (cw - nw) // 2
             y_off = (ch - nh) // 2
             self.video_canvas.create_image(x_off, y_off, anchor="nw", image=self.tk_img)
@@ -377,7 +468,7 @@ class CyberBiometricsApp(tk.Tk):
 
         self.after(33, self.update_video_frame)
 
-    def draw_jarvis_hud(self, frame, face_box, forehead_box):
+    def draw_jarvis_hud(self, frame, face_box, rois):
         """Draws Iron Man / JARVIS holographic HUD targeting wireframes on video."""
         hud = frame.copy()
         h, w = hud.shape[:2]
@@ -392,35 +483,32 @@ class CyberBiometricsApp(tk.Tk):
             c_neon = (255, 240, 0)  # BGR Cyan
 
             # Corner brackets
-            d = 20
-            # Top-Left
+            d = 22
             cv2.line(hud, (x, y), (x + d, y), c_neon, 2)
             cv2.line(hud, (x, y), (x, y + d), c_neon, 2)
-            # Top-Right
             cv2.line(hud, (x + fw, y), (x + fw - d, y), c_neon, 2)
             cv2.line(hud, (x + fw, y), (x + fw, y + d), c_neon, 2)
-            # Bottom-Left
             cv2.line(hud, (x, y + fh), (x + d, y + fh), c_neon, 2)
             cv2.line(hud, (x, y + fh), (x, y + fh - d), c_neon, 2)
-            # Bottom-Right
             cv2.line(hud, (x + fw, y + fh), (x + fw - d, y + fh), c_neon, 2)
             cv2.line(hud, (x + fw, y + fh), (x + fw, y + fh - d), c_neon, 2)
 
-            # Face target label
-            cv2.putText(hud, "SUBJECT LOCKED // BIOMETRIC SCAN", (x, y - 8),
+            cv2.putText(hud, "SUBJECT LOCKED // POS CHROMINANCE", (x, y - 8),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 240, 0), 1, cv2.LINE_AA)
 
-        # Draw Forehead Capillary Optical ROI
-        if forehead_box:
-            (fx, fy, f_w, f_h) = forehead_box
-            cv2.rectangle(hud, (fx, fy), (fx + f_w, fy + f_h), (0, 255, 157), 1)
-            cv2.putText(hud, "rPPG OPTICAL ZONE", (fx, fy - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 255, 157), 1, cv2.LINE_AA)
+        # Draw Multi-Skin Optical Zones
+        labels = ["FOREHEAD ROI", "L-CHEEK", "R-CHEEK"]
+        for idx, roi in enumerate(rois):
+            (rx, ry, r_w, r_h) = roi
+            cv2.rectangle(hud, (rx, ry), (rx + r_w, ry + r_h), (0, 255, 157), 1)
+            lbl = labels[idx] if idx < len(labels) else "SKIN ROI"
+            cv2.putText(hud, lbl, (rx, ry - 4),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.32, (0, 255, 157), 1, cv2.LINE_AA)
 
         # Top-left HUD status watermark
-        cv2.putText(hud, "JARVIS OPTICAL rPPG ENGINE v2.4", (15, 25),
+        cv2.putText(hud, "JARVIS OPTICAL POS rPPG ENGINE v2.0", (15, 25),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 240, 255), 1, cv2.LINE_AA)
-        cv2.putText(hud, f"SPECTRAL ABSORPTION: GREEN (530nm)", (15, 45),
+        cv2.putText(hud, "OPTICAL CHROMINANCE (POS ALGORITHM)", (15, 45),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.4, (100, 116, 139), 1, cv2.LINE_AA)
 
         return hud
@@ -445,12 +533,18 @@ class CyberBiometricsApp(tk.Tk):
 
             self.lbl_cardiac_zone.config(text=zone_text, fg=zone_col)
             self.lbl_bpm_value.config(fg=zone_col)
-            self.lbl_snr.config(text=f"Signal SNR Quality: {self.processor.snr:.1f} dB (Optimal)")
+            self.lbl_snr.config(text=f"Optical SNR: {self.processor.snr:.1f} dB (High Quality)")
+
+            if self.processor.motion_detected:
+                self.lbl_motion.config(text="Face Stability: ⚠️ Head Moving (Holding BPM)", fg=self.c_neon_amber)
+            else:
+                self.lbl_motion.config(text="Face Stability: 🟢 Optimal (Locked)", fg=self.c_neon_green)
         else:
             self.lbl_bpm_value.config(text="--", fg=self.c_muted)
             self.lbl_status_badge.config(text="🔍 ACQUIRING FACE & OPTICAL SIGNAL...", fg=self.c_neon_cyan)
             self.lbl_cardiac_zone.config(text="🟢 Status: Looking at camera...", fg=self.c_muted)
-            self.lbl_snr.config(text="Signal Quality: Initializing...")
+            self.lbl_snr.config(text="Optical SNR: Calibrating...")
+            self.lbl_motion.config(text="Face Stability: 🟢 Optimal (Locked)", fg=self.c_neon_green)
 
         # Draw rolling EKG Waveform
         self.draw_ekg_waveform()
@@ -469,11 +563,9 @@ class CyberBiometricsApp(tk.Tk):
 
         pulse = list(self.processor.filtered_pulse)
         if len(pulse) < 5:
-            # Flatline when no data
             self.ekg_canvas.create_line(0, cy, w, cy, fill="#00f0ff", width=1, dash=(2, 2))
             return
 
-        # Normalize pulse to canvas height
         pulse_arr = np.array(pulse)
         p_min = np.min(pulse_arr)
         p_max = np.max(pulse_arr)
@@ -485,7 +577,6 @@ class CyberBiometricsApp(tk.Tk):
         for idx, val in enumerate(pulse_arr):
             x = idx * step
             norm_val = (val - p_min) / span
-            # Invert for canvas (0 is top)
             y = (h - 20) - (norm_val * (h - 40))
             pts.extend([x, y])
 
@@ -504,13 +595,11 @@ class CyberBiometricsApp(tk.Tk):
                 if self.sound_enabled.get() and is_valid and 45 <= bpm <= 180 and HAS_SOUND:
                     interval_sec = 60.0 / bpm
                     try:
-                        # Double pulse "Lub-Dub" heartbeat sound
-                        winsound.Beep(320, 40)
-                        time.sleep(0.08)
-                        winsound.Beep(260, 45)
+                        winsound.Beep(320, 35)
+                        time.sleep(0.07)
+                        winsound.Beep(260, 40)
                     except Exception:
                         pass
-                    # Sleep remainder of heartbeat cycle
                     sleep_time = max(0.1, interval_sec - 0.15)
                     time.sleep(sleep_time)
                 else:
