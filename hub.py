@@ -128,29 +128,35 @@ class CyberSuiteHub(tk.Tk):
         footer.pack(fill=tk.X, side=tk.BOTTOM)
         footer.pack_propagate(False)
 
-        tk.Label(footer, text="Antigravity Cyber Suite • 8-Tool Cyber Warfare, 3D Globe & Biometrics Studio",
+        tk.Label(footer, text="Antigravity Cyber Suite • 9-Tool Cyber Warfare, Acoustic & Biometrics Studio",
                  font=('Consolas', 8), bg=self.c_panel, fg=self.c_muted).pack(side=tk.LEFT, padx=10, pady=12)
 
-        btn_globe = tk.Button(footer, text="🌐 3D Cyber Globe", bg="#1e3a8a", fg=self.c_neon_cyan,
-                              font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=7, pady=3, cursor='hand2',
+        btn_acoustic = tk.Button(footer, text="🔊 Acoustic Studio", bg="#581c87", fg=self.c_neon_purple,
+                                 font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=6, pady=3, cursor='hand2',
+                                 activebackground="#7e22ce", activeforeground="#ffffff",
+                                 command=self.launch_acoustic)
+        btn_acoustic.pack(side=tk.RIGHT, padx=(2, 8), pady=6)
+
+        btn_globe = tk.Button(footer, text="🌐 3D Globe", bg="#1e3a8a", fg=self.c_neon_cyan,
+                              font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=6, pady=3, cursor='hand2',
                               activebackground="#2563eb", activeforeground="#ffffff",
                               command=self.launch_globe)
-        btn_globe.pack(side=tk.RIGHT, padx=(2, 10), pady=6)
+        btn_globe.pack(side=tk.RIGHT, padx=2, pady=6)
 
-        btn_bio = tk.Button(footer, text="🫀 Biometrics HUD", bg="#064e3b", fg=self.c_neon_green,
-                            font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=7, pady=3, cursor='hand2',
+        btn_bio = tk.Button(footer, text="🫀 Biometrics", bg="#064e3b", fg=self.c_neon_green,
+                            font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=6, pady=3, cursor='hand2',
                             activebackground="#047857", activeforeground="#ffffff",
                             command=self.launch_biometrics)
         btn_bio.pack(side=tk.RIGHT, padx=2, pady=6)
 
-        btn_fsociety = tk.Button(footer, text="💀 fsociety Simulator", bg="#450a0a", fg=self.c_neon_red,
-                                 font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=7, pady=3, cursor='hand2',
+        btn_fsociety = tk.Button(footer, text="💀 fsociety", bg="#450a0a", fg=self.c_neon_red,
+                                 font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=6, pady=3, cursor='hand2',
                                  activebackground="#7f1d1d", activeforeground="#ffffff",
                                  command=self.launch_fsociety)
         btn_fsociety.pack(side=tk.RIGHT, padx=2, pady=6)
 
-        btn_osint = tk.Button(footer, text="🔍 OSINT Recon", bg="#27272a", fg=self.c_text,
-                              font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=7, pady=3, cursor='hand2',
+        btn_osint = tk.Button(footer, text="🔍 OSINT", bg="#27272a", fg=self.c_text,
+                              font=('Segoe UI', 8, 'bold'), relief=tk.FLAT, padx=6, pady=3, cursor='hand2',
                               activebackground="#3f3f46", activeforeground="#ffffff",
                               command=self.launch_osint)
         btn_osint.pack(side=tk.RIGHT, padx=2, pady=6)
@@ -189,6 +195,10 @@ class CyberSuiteHub(tk.Tk):
 
     def launch_globe(self):
         script = os.path.join(os.path.dirname(__file__), "cyber_globe.py")
+        subprocess.Popen([sys.executable, script])
+
+    def launch_acoustic(self):
+        script = os.path.join(os.path.dirname(__file__), "cyber_acoustic_studio.py")
         subprocess.Popen([sys.executable, script])
 
 
