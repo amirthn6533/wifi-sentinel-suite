@@ -1,31 +1,60 @@
-﻿# Contributing to Wi-Fi Sentinel Suite
+# Contributing to wifi-sentinel-suite
 
-Thank you for your interest in contributing to the Wi-Fi Sentinel Suite!
+Thank you for your interest in contributing! We welcome contributions from everyone.
 
 ## Code of Conduct
-We are committed to providing a friendly, safe and welcoming environment for all.
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
 ## How to Contribute
-1. **Fork the Repository** on GitHub.
-2. **Clone your fork** locally:
-   \\\ash
-   git clone https://github.com/your-username/wifi-sentinel-suite.git
-   \\\
-3. **Create a Feature Branch**:
-   \\\ash
-   git checkout -b feature/awesome-rf-analyzer
-   \\\
-4. **Install Dependencies & Run Tests**:
-   \\\ash
-   pip install -r requirements.txt
-   pytest tests/
-   \\\
-5. **Commit your changes**:
-   \\\ash
-   git commit -m "feat: add spectrum waterfall visualization"
-   \\\
-6. **Push to your fork and submit a Pull Request**.
 
-## Pull Request Guidelines
-- Ensure all unit tests in \	ests/\ pass cleanly.
-- Maintain comprehensive docstrings on new signal/RF analysis classes.
+### 1. Reporting Bugs
+- Check existing GitHub Issues to see if the bug has already been reported.
+- If not, create a new issue using our **Bug Report** template with clear reproduction steps.
+
+### 2. Suggesting Enhancements
+- Open a feature request issue using our **Feature Request** template.
+- Clearly describe the use case and proposed solution.
+
+### 3. Pull Request Workflow
+1. Fork the repository to your own GitHub account.
+2. Clone your fork and create a descriptive feature branch:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. Make your changes adhering to code style guidelines.
+4. Add or update unit tests to verify your implementation.
+5. Commit your changes using conventional commit messages:
+   - `feat: add new feature`
+   - `fix: resolve bug in parser`
+   - `docs: update documentation`
+   - `test: add unit tests`
+6. Push to your branch and open a Pull Request against the default branch.
+
+### Python Development Setup
+1. Clone the repository and navigate into the directory:
+   ```bash
+   git clone https://github.com/amirthn6533/wifi-sentinel-suite.git
+   cd wifi-sentinel-suite
+   ```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   # Linux/macOS:
+   source venv/bin/activate
+   # Windows:
+   venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the test suite:
+   ```bash
+   pytest
+   ```
+
+
+## Code Style & Standards
+- Write clean, documented, and testable code.
+- Add Google/Sphinx style docstrings to non-trivial functions and classes.
+- Ensure all CI/CD checks pass before requesting review.

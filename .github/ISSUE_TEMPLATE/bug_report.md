@@ -1,24 +1,26 @@
-﻿---
-name: Bug Report
-about: Create a report to help us improve the security suite
+---
+name: Bug report
+about: Create a report to help us improve the project
 title: '[BUG] '
-labels: 'bug'
+labels: bug
 assignees: ''
 ---
 
-**Describe the bug**
+### Describe the Bug
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Run command '...'
-2. Click on '....'
+### Steps to Reproduce
+1. Go to '...'
+2. Run command / action '....'
 3. See error
 
-**Expected behavior**
-A clear description of what you expected to happen.
+### Expected Behavior
+A clear and concise description of what you expected to happen.
 
-**Environment:**
-- OS: [e.g. Windows 11, Linux]
-- Python Version: [e.g. 3.11]
-- Wi-Fi Adapter: [e.g. Realtek RTL8811AU / Built-in]
+### Screenshots & Logs
+If applicable, add screenshots or console output to help explain your problem.
+
+### Environment
+- OS: [e.g. Windows 11, Ubuntu 22.04, macOS]
+- Runtime: [e.g. Python 3.10+, Node 18+]
+- Version: [e.g. 1.0.0]
