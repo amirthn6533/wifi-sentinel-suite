@@ -1,3 +1,4 @@
+from scipy import signal
 """
 =============================================================================
 🔊 CYBER ACOUSTIC & SPECTROGRAM STUDIO (Ultrasonic Air-Gap & Audio Stego)
