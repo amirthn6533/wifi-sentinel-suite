@@ -1,4 +1,13 @@
-# ⚡ Wi-Fi Cyber Suite | Advanced RF Sensing, 3D Threat Globe, Biometrics & Ultrasonic Stego
+# ⚡ Wi-Fi Cyber Sentinel Suite | Advanced RF Sensing & Threat Diagnostics
+
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Category](https://img.shields.io/badge/Category-Cybersecurity_%26_RF_Audit-red?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
+
+</div>
 
 > **Ever seen a spy movie where an agent sweeps a hotel room with a beeping gadget to find hidden bugs? That’s literally this app.**
 > 
