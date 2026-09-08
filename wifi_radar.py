@@ -305,6 +305,33 @@ class SecurityAuditor:
 
 
 class WifiScanner:
+    """
+    High-Performance Hardware Wi-Fi Scanner & RF Telemetry Engine.
+    
+    Interfaces with the underlying operating system WLAN Subsystem and Native 
+    802.11 Wireless LAN APIs (`netsh wlan show networks mode=bssid`).
+    
+    Key Architectural Responsibilities:
+    -----------------------------------
+    1. Adapter Enumeration:
+       Queries and indexes all active wireless network interface cards (NICs) 
+       and virtual WLAN miniports.
+    2. Beacon Frame Demultiplexing:
+       Extracts SSID, BSSID (MAC address), Authentication protocols (WPA2, WPA3-SAE, WEP),
+       Encryption ciphers (AES-CCMP, TKIP), and physical radio types (802.11b/g/n/ac/ax).
+    3. Radio Frequency (RF) Signal Translation:
+       Converts Windows percentage signal quality (0% - 100%) into calibrated 
+       Received Signal Strength Indication (RSSI) in decibels-milliwatts (dBm):
+           dBm = (Signal_Percentage / 2.0) - 100
+       where -30 dBm represents optimal signal next to router, and -90 dBm represents
+       the sensitivity limit of standard client radio receivers.
+    4. Frequency Spectrum Demarcation:
+       Categorizes channels into 2.4 GHz ISM band (Channels 1-14, 20MHz/40MHz bandwidth)
+       and 5 GHz UNII band (Channels 36-165, up to 160MHz bandwidth).
+    5. OUI Vendor Attribution & Threat Cross-Correlation:
+       Resolves router hardware manufacturer and passes data through `SecurityAuditor`
+       for Evil Twin and Rogue AP heuristic analysis.
+    """
     """Scans Wi-Fi networks using Windows native netsh command with interface-specific support."""
     
     @staticmethod
