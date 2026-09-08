@@ -32,20 +32,51 @@ except ImportError:
 # 1D Kalman Filter for Real-Time Radar & Tracker Stabilization
 # =====================================================================
 class KalmanFilter1D:
-    """Mathematical 1D Kalman Filter to eliminate RF multipath fluctuations while preserving fast response."""
-    def __init__(self, process_variance=0.08, measurement_variance=4.0, initial_value=0.0):
+    """
+    Mathematical 1D Discrete Kalman Filter for RF Signal Processing.
+    
+    Eliminates multi-path fading, interference spikes, and Rayleigh scattering
+    in live Received Signal Strength Indication (RSSI) readings while preserving
+    fast dynamic response during physical target movement.
+
+    Attributes:
+        q (float): Process noise covariance (models physical device mobility).
+        r (float): Measurement noise covariance (models ambient RF noise).
+        x (float): Filtered state estimate (current smoothed RSSI dBm).
+        p (float): Error covariance estimate.
+    """
+    def __init__(self, process_variance: float = 0.08, measurement_variance: float = 4.0, initial_value: float = 0.0):
+        """
+        Initializes the 1D Kalman Filter with process and measurement noise covariances.
+
+        Args:
+            process_variance (float): Expectation of true physical signal change. Defaults to 0.08.
+            measurement_variance (float): Variance of hardware sensor noise. Defaults to 4.0.
+            initial_value (float): Initial baseline dBm signal. Defaults to 0.0.
+        """
         self.q = process_variance
         self.r = measurement_variance
         self.x = float(initial_value)
         self.p = 1.0
         self.initialized = False
 
-    def update(self, measurement):
+    def update(self, measurement: float) -> float:
+        """
+        Executes prediction and update cycles based on incoming raw sensor reading.
+
+        Args:
+            measurement (float): Raw RSSI dBm value from WLAN interface.
+
+        Returns:
+            float: Optimal smoothed RSSI state estimate.
+        """
         if not self.initialized:
             self.x = float(measurement)
             self.initialized = True
             return self.x
+        # Time update (prediction)
         p_pred = self.p + self.q
+        # Measurement update (correction)
         k = p_pred / (p_pred + self.r)
         self.x = self.x + k * (float(measurement) - self.x)
         self.p = (1.0 - k) * p_pred

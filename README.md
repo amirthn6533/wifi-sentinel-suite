@@ -2,6 +2,8 @@
 
 <div align="center">
 
+[![Security Suite CI](https://github.com/amirthn6533/wifi-sentinel-suite/actions/workflows/ci.yml/badge.svg)](https://github.com/amirthn6533/wifi-sentinel-suite/actions)
+![Status: Security Research Suite](https://img.shields.io/badge/Status-Research_%26_Security_Suite-blueviolet?style=for-the-badge&logo=shield)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ![Category](https://img.shields.io/badge/Category-Cybersecurity_%26_RF_Audit-red?style=for-the-badge)
